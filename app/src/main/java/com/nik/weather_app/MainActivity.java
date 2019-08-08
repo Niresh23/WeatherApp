@@ -1,5 +1,9 @@
 package com.nik.weather_app;
 
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -24,14 +28,22 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.Menu;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     private MenuListAdapter adapter = null;
+
+    private TextView textHumidity;
+    private TextView textTemperature;
+    private SensorManager sensorManager;
+    private Sensor sensorAmbientTemperature;
+    private Sensor sensorHumidity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +55,65 @@ public class MainActivity extends AppCompatActivity
         initFloatingAction();
         initSideMenu(toolbar);
         initList();
+        initViews();
+        getSensors();
     }
+    private void initViews() {
+        textTemperature = findViewById(R.id.text_ambient_temperature);
+        textHumidity = findViewById(R.id.text_humidity);
+    }
+
+    private void getSensors() {
+        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        sensorAmbientTemperature = sensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE);
+        sensorHumidity = sensorManager.getDefaultSensor(Sensor.TYPE_RELATIVE_HUMIDITY);
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        sensorManager.registerListener(listenerTemperature, sensorAmbientTemperature,
+                SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(listenerHumidity, sensorHumidity,
+                SensorManager.SENSOR_DELAY_NORMAL);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        sensorManager.unregisterListener(listenerTemperature, sensorAmbientTemperature);
+        sensorManager.unregisterListener(listenerHumidity, sensorHumidity);
+    }
+
+    private void showTemperatureSensor(SensorEvent sensorEvent) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("Температура ОС = ").append(sensorEvent.values[0]);
+        textTemperature.setText(stringBuilder);
+    }
+    private void showHumiditySensor(SensorEvent sensorEvent) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("Относительная влажность = ").append(sensorEvent.values[0]);
+        textHumidity.setText(stringBuilder);
+    }
+    SensorEventListener listenerTemperature = new SensorEventListener() {
+        @Override
+        public void onSensorChanged(SensorEvent sensorEvent) {
+            showTemperatureSensor(sensorEvent);
+        }
+
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int i) {}
+    };
+    SensorEventListener listenerHumidity = new SensorEventListener() {
+        @Override
+        public void onSensorChanged(SensorEvent sensorEvent) {
+            showHumiditySensor(sensorEvent);
+        }
+
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int i) {}
+    };
 
     private void initList() {
         ArrayList<Integer> data = new ArrayList<>(5);
