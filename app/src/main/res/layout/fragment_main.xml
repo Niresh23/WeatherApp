@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".FragmentMain">
+
+    <!-- TODO: Update blank fragment layout -->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/text_view_city"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text=""
+            android:textSize="42sp" />
+
+        <TextView
+            android:id="@+id/text_view_update"
+            android:layout_width="match_parent"
+            android:layout_height="55sp"
+            android:gravity="center_horizontal"
+            android:text="" />
+
+        <TextView
+            android:id="@+id/text_view_details"
+            android:layout_width="match_parent"
+            android:layout_height="165sp"
+            android:gravity="center"
+            android:text="" />
+
+        <TextView
+            android:id="@+id/text_view_current_temperature"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:text=""
+            android:textSize="42sp" />
+
+    </LinearLayout>
+
+</FrameLayout>
