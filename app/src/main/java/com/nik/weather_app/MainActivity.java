@@ -1,137 +1,73 @@
 package com.nik.weather_app;
 
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
-import android.os.Bundle;
 
+import android.content.DialogInterface;
+import android.net.Uri;
+import android.os.Bundle;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
-import android.text.Editable;
-import android.text.TextWatcher;
+import android.text.InputType;
 import android.view.View;
 
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.view.GravityCompat;
 import androidx.appcompat.app.ActionBarDrawerToggle;
-
 import android.view.MenuItem;
-
 import com.google.android.material.navigation.NavigationView;
+import com.nik.weather_app.rest.OpenWeatherRepo;
+import com.nik.weather_app.rest.entities.WeatherRequestRestModel;
 
 import androidx.drawerlayout.widget.DrawerLayout;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import android.view.Menu;
-import android.widget.TextView;
+import android.widget.EditText;
 import android.widget.Toast;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.text.DateFormat;
+import java.util.Date;
+import java.util.Locale;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, FragmentSetting.OnFragmentInteractionListener {
     private MenuListAdapter adapter = null;
 
-    private TextView textHumidity;
-    private TextView textTemperature;
-    private SensorManager sensorManager;
-    private Sensor sensorAmbientTemperature;
-    private Sensor sensorHumidity;
+    private FragmentMain fragmentMain = new FragmentMain();
+    private FragmentSetting fragmentSetting = new FragmentSetting();
+    private final FragmentManager fragmentManager = getSupportFragmentManager();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
-
+        initDrawerLayout(toolbar);
         setSupportActionBar(toolbar);
         initFloatingAction();
-        initSideMenu(toolbar);
-        initList();
-        initViews();
-        getSensors();
-    }
-    private void initViews() {
-        textTemperature = findViewById(R.id.text_ambient_temperature);
-        textHumidity = findViewById(R.id.text_humidity);
-    }
-
-    private void getSensors() {
-        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        sensorAmbientTemperature = sensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE);
-        sensorHumidity = sensorManager.getDefaultSensor(Sensor.TYPE_RELATIVE_HUMIDITY);
+        if(savedInstanceState == null) openFragment(fragmentMain);
 
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        sensorManager.registerListener(listenerTemperature, sensorAmbientTemperature,
-                SensorManager.SENSOR_DELAY_NORMAL);
-        sensorManager.registerListener(listenerHumidity, sensorHumidity,
-                SensorManager.SENSOR_DELAY_NORMAL);
+    private void openFragment(Fragment fragment) {
+        fragmentManager.beginTransaction()
+                .replace(R.id.fragment_layout, fragment)
+                .addToBackStack("").commit();
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        sensorManager.unregisterListener(listenerTemperature, sensorAmbientTemperature);
-        sensorManager.unregisterListener(listenerHumidity, sensorHumidity);
-    }
-
-    private void showTemperatureSensor(SensorEvent sensorEvent) {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("Температура ОС = ").append(sensorEvent.values[0]);
-        textTemperature.setText(stringBuilder);
-    }
-    private void showHumiditySensor(SensorEvent sensorEvent) {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("Относительная влажность = ").append(sensorEvent.values[0]);
-        textHumidity.setText(stringBuilder);
-    }
-    SensorEventListener listenerTemperature = new SensorEventListener() {
-        @Override
-        public void onSensorChanged(SensorEvent sensorEvent) {
-            showTemperatureSensor(sensorEvent);
-        }
-
-        @Override
-        public void onAccuracyChanged(Sensor sensor, int i) {}
-    };
-    SensorEventListener listenerHumidity = new SensorEventListener() {
-        @Override
-        public void onSensorChanged(SensorEvent sensorEvent) {
-            showHumiditySensor(sensorEvent);
-        }
-
-        @Override
-        public void onAccuracyChanged(Sensor sensor, int i) {}
-    };
-
-    private void initList() {
-        ArrayList<Integer> data = new ArrayList<>(5);
-        data.add(1);
-        data.add(2);
-        data.add(3);
-        data.add(4);
-        data.add(5);
-
-        adapter = new MenuListAdapter(data, this);
-        LinearLayoutManager manager = new LinearLayoutManager(getApplicationContext());
-
-        RecyclerView recyclerView = findViewById(R.id.recyclerView);
-        recyclerView.setLayoutManager(manager);
-        recyclerView.setAdapter(adapter);
-    }
-
-    private void initSideMenu(Toolbar toolbar) {
+    private void initDrawerLayout(Toolbar toolbar) {
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -170,7 +106,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
@@ -202,28 +138,83 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
+
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
         if (id == R.id.nav_home) {
-            // Handle the camera action
+            Toast.makeText(this, getResources().getString(R.string.menu_home), Toast.LENGTH_SHORT).show();
+            openFragment(fragmentMain);
         } else if (id == R.id.nav_gallery) {
-
+            showInputDialog();
         } else if (id == R.id.nav_slideshow) {
 
         } else if (id == R.id.nav_tools) {
-
+            Toast.makeText(getApplicationContext(), getString(R.string.menu_tools), Toast.LENGTH_SHORT)
+                    .show();
+            openFragment(fragmentSetting);
         } else if (id == R.id.nav_share) {
-
+            Toast.makeText(getApplicationContext(), getString(R.string.nav_header_title), Toast.LENGTH_SHORT)
+                    .show();
         } else if (id == R.id.nav_send) {
-
+            Toast.makeText(getApplicationContext(), getString(R.string.menu_tools), Toast.LENGTH_SHORT)
+                    .show();
         }
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+    private void showInputDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.change_city);
+
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        builder.setView(input);
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                updateWeatherData(input.getText().toString());
+            }
+        });
+        builder.show();
+    }
+
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
+    }
+
+    private void updateWeatherData(final String city) {
+        OpenWeatherRepo.getSingletone().getAPI().loadWeather(city + ",ru",
+                "762ee61f52313fbd10a4eb54ae4d4de2", "metric")
+                .enqueue(new Callback<WeatherRequestRestModel>() {
+                    @Override
+                    public void onResponse(Call<WeatherRequestRestModel> call, Response<WeatherRequestRestModel> response) {
+                        if(response.body() != null && response.isSuccessful()) {
+                            renderWeather(response.body());
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<WeatherRequestRestModel> call, Throwable t) {
+                        Toast.makeText(getBaseContext(), getString(R.string.network_error),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void renderWeather(WeatherRequestRestModel model) {
+
+        fragmentMain.setPlaceName(model.name, model.sys.country);
+        fragmentMain.setDetails(model.weather[0].description, model.main.humidity, model.main.pressure);
+        fragmentMain.setCurrentTemp(model.main.temp);
+        fragmentMain.setUpdateText(model.dt);
+//        setWeatherIcon(model.weather[0].id,
+//                model.sys.sunrise * 1000,
+//                model.sys.sunset * 1000);
     }
 }

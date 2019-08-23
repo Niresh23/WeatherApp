@@ -68,7 +68,7 @@ public class MenuListAdapter extends RecyclerView.Adapter {
     }
     class ViewHolder extends RecyclerView.ViewHolder{
         TextView textView;
-        public ViewHolder(@NonNull View itemView) {
+        private ViewHolder(@NonNull View itemView) {
             super(itemView);
             textView = itemView.findViewById(R.id.text_list_item);
         }
