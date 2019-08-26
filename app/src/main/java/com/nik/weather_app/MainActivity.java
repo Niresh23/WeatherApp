@@ -1,7 +1,7 @@
 package com.nik.weather_app;
 
-
 import android.content.DialogInterface;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -10,13 +10,14 @@ import com.google.android.material.snackbar.Snackbar;
 import android.text.InputType;
 import android.view.View;
 
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.view.GravityCompat;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import android.view.MenuItem;
 import com.google.android.material.navigation.NavigationView;
+import com.nik.weather_app.dataBase.DataBaseHelper;
+import com.nik.weather_app.dataBase.WeatherTable;
 import com.nik.weather_app.rest.OpenWeatherRepo;
 import com.nik.weather_app.rest.entities.WeatherRequestRestModel;
 
@@ -30,12 +31,7 @@ import android.view.Menu;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.text.DateFormat;
-import java.util.Date;
-import java.util.Locale;
+import java.util.HashMap;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -43,34 +39,51 @@ import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, FragmentSetting.OnFragmentInteractionListener {
+    //Переделать
+    private String currentCity; //Переделать
+    //Переделать
+    private DrawerLayout drawer;
+    private NavigationView navigationView;
+    private ActionBarDrawerToggle toggle;
+    FloatingActionButton fab;
     private MenuListAdapter adapter = null;
 
+    //Работа с фрагментами
     private FragmentMain fragmentMain = new FragmentMain();
     private FragmentSetting fragmentSetting = new FragmentSetting();
     private final FragmentManager fragmentManager = getSupportFragmentManager();
+    //
 
+    //База данных
+    SQLiteDatabase database;
+    //
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
+        initDatabase();
         initDrawerLayout(toolbar);
         setSupportActionBar(toolbar);
         initFloatingAction();
         if(savedInstanceState == null) openFragment(fragmentMain);
-
     }
 
+    private void initDatabase() {
+        database = new DataBaseHelper(getApplicationContext()).getWritableDatabase();
+    }
+    //ОТкрытие фрагментов
     private void openFragment(Fragment fragment) {
         fragmentManager.beginTransaction()
                 .replace(R.id.fragment_layout, fragment)
                 .addToBackStack("").commit();
     }
 
+    //Инициализация окружения
     private void initDrawerLayout(Toolbar toolbar) {
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        NavigationView navigationView = findViewById(R.id.nav_view);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+        drawer = findViewById(R.id.drawer_layout);
+        navigationView = findViewById(R.id.nav_view);
+        toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
@@ -78,7 +91,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void initFloatingAction() {
-        FloatingActionButton fab = findViewById(R.id.fab);
+        fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -113,6 +126,11 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         switch (id) {
+            case R.id.action_refresh: {
+                updateWeatherData(currentCity);
+                break;
+            }
+
             case R.id.action_3_days: {
                 adapter.setThreeDays();
                 break;
@@ -131,7 +149,7 @@ public class MainActivity extends AppCompatActivity
                 break;
             }
             default: {
-                Toast.makeText(getApplicationContext(), getString(R.string.action_not_found), Toast.LENGTH_SHORT)
+                Toast.makeText(getApplicationContext(), "Prekrasoe daleko", Toast.LENGTH_SHORT)
                         .show();
             }
         }
@@ -177,7 +195,12 @@ public class MainActivity extends AppCompatActivity
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                updateWeatherData(input.getText().toString());
+                currentCity = input.getText().toString().toUpperCase();
+                if(WeatherTable.containsCity(database, currentCity)) {
+                    HashMap<String, String> information = WeatherTable.getInformationByCity(database, currentCity);
+                } else {
+                    updateWeatherData(currentCity);
+                }
             }
         });
         builder.show();
@@ -208,13 +231,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void renderWeather(WeatherRequestRestModel model) {
-
         fragmentMain.setPlaceName(model.name, model.sys.country);
         fragmentMain.setDetails(model.weather[0].description, model.main.humidity, model.main.pressure);
         fragmentMain.setCurrentTemp(model.main.temp);
         fragmentMain.setUpdateText(model.dt);
-//        setWeatherIcon(model.weather[0].id,
-//                model.sys.sunrise * 1000,
-//                model.sys.sunset * 1000);
+        fragmentMain.setWeatherIcon(model.weather[0].id, model.sys.sunrise * 1000,
+                model.sys.sunset * 1000);
     }
 }

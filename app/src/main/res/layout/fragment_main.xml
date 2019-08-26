@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/sea"
     tools:context=".FragmentMain">
 
     <!-- TODO: Update blank fragment layout -->
@@ -28,11 +29,21 @@
             android:text="" />
 
         <TextView
+            android:id="@+id/text_view_weather_icon"
+            android:layout_width="match_parent"
+            android:layout_height="99dp"
+            android:fontFamily="@font/weather"
+            android:gravity="center_horizontal"
+            android:text="@string/weather_clear_night"
+            android:textSize="42sp" />
+
+        <TextView
             android:id="@+id/text_view_details"
             android:layout_width="match_parent"
-            android:layout_height="165sp"
+            android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="" />
+            android:text=""
+            android:textSize="14sp" />
 
         <TextView
             android:id="@+id/text_view_current_temperature"
