@@ -25,15 +25,17 @@ public class WeatherTable {
 
     static void createTable(SQLiteDatabase database) {
         database.execSQL("CREATE TABLE " + TABLE_NAME + " (" + COLUMN_ID
-                + " INTEGER PRIMARY KEY AUTOINCREMENT," + COLUMN_CITY + " TEXT," +
-                COLUMN_COUNTRY + " TEXT," + COLUMN_DESCRIPTION +
-                " TEXT," + COLUMN_HUMIDITY + " REAL," + COLUMN_PRESSURE + " REAL," +
-                COLUMN_TEMPERATURE + " REAL," + COLUMN_UPDATE + " INTEGER," + COLUMN_SUNRISE + " INTEGER," +
-                COLUMN_SUNSET + " INTEGER," +
+                + " INTEGER PRIMARY KEY AUTOINCREMENT," +COLUMN_COUNTRY + " TEXT, " +
+                COLUMN_CITY + " TEXT,"  + COLUMN_DESCRIPTION + " TEXT," +
+                COLUMN_HUMIDITY + " REAL," + COLUMN_PRESSURE + " REAL," +
+                COLUMN_TEMPERATURE + " REAL," + COLUMN_UPDATE + " INTEGER," +
+                COLUMN_SUNRISE + " INTEGER," + COLUMN_SUNSET + " INTEGER," +
                 COLUMN_ICON + " INTEGER);");
     }
 
-
+    public static void dropTable(SQLiteDatabase database) {
+        database.execSQL("DROP TABLE " + TABLE_NAME);
+    }
     public static void addRec(SQLiteDatabase database, String city, String country, String description, float humidity,
                               float pressure, float temperature, long update, long icon, long sunrise, long sunset) {
         ContentValues values = new ContentValues();
@@ -54,22 +56,24 @@ public class WeatherTable {
                               float newPressure, float newTemperature, long newUpdate, long newIcon,
                               long newSunrise, long newSunset) {
 
-        database.execSQL("UPDATE " + TABLE_NAME + " set " + COLUMN_COUNTRY + " = " + newCountry +
-                ", " + COLUMN_DESCRIPTION + " = " + newDescription +
+        database.execSQL("UPDATE " + TABLE_NAME + " set " + COLUMN_COUNTRY + " = " + "'" + newCountry + "'" +
+                ", " + COLUMN_DESCRIPTION + " = " + "'" + newDescription+ "'" +
                 ", " + COLUMN_HUMIDITY + " = " + newHumidity + ", " + COLUMN_PRESSURE + " = " + newPressure +
                 ", " + COLUMN_TEMPERATURE + " = " + newTemperature + ", " + COLUMN_UPDATE + " = " + newUpdate +
                 ", " + COLUMN_SUNRISE + " = " + newSunrise + ", " + COLUMN_SUNSET + " = " + newSunset +
                 ", " + COLUMN_ICON + " = " + newIcon +
-                "WHERE " + COLUMN_CITY + " = " + cityEdite + ";");
+                " WHERE " + COLUMN_CITY + " = " + "'" + cityEdite+ "'" + ";");
     }
 
     public static HashMap<String, String> getInformationByCity(SQLiteDatabase database, String city){
         HashMap<String, String> information = new HashMap<>();
-        Cursor cursor = database.query(TABLE_NAME, new String[]{COLUMN_COUNTRY,COLUMN_DESCRIPTION, COLUMN_HUMIDITY, COLUMN_PRESSURE, COLUMN_TEMPERATURE,
-                                                    COLUMN_UPDATE, COLUMN_ICON, COLUMN_SUNRISE, COLUMN_SUNSET},
-                COLUMN_CITY + " = " + city.toUpperCase(),
-                new String[]{city},null, null, null, null);
+        Cursor cursor = database.query(TABLE_NAME, new String[]{COLUMN_CITY, COLUMN_COUNTRY,
+                        COLUMN_DESCRIPTION, COLUMN_HUMIDITY, COLUMN_PRESSURE, COLUMN_TEMPERATURE,
+                        COLUMN_UPDATE, COLUMN_ICON, COLUMN_SUNRISE, COLUMN_SUNSET},
+                COLUMN_CITY + " =?",
+                new String[]{city.toUpperCase()},null, null, null, null);
         if (cursor.moveToNext()){
+            information.put("city", city.toUpperCase());
             information.put("description",cursor.getString(cursor.getColumnIndex(COLUMN_DESCRIPTION)));
             information.put("country",cursor.getString(cursor.getColumnIndex(COLUMN_COUNTRY)));
             information.put("humidity",cursor.getString(cursor.getColumnIndex(COLUMN_HUMIDITY)));
@@ -99,14 +103,15 @@ public class WeatherTable {
         return getResultFromCursor(cursor);
     }
 
-    public static List<String> getCity(SQLiteDatabase database) {
+    public static List<String> getCities(SQLiteDatabase database) {
         Cursor cursor = database.query(TABLE_NAME, new String[]{COLUMN_CITY}, null, null,
                 null, null, null);
         return getResultFromCursor(cursor);
     }
 
     public static boolean containsCity(SQLiteDatabase database ,String city) {
-        return getCity(database).contains(city.toUpperCase());
+        String cityInDatabase = getCities(database).toString();
+        return getCities(database).contains(city.toUpperCase());
     }
 
     private static List<String> getResultFromCursor(Cursor cursor) {

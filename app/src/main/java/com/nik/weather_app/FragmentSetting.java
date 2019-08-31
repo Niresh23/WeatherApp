@@ -1,27 +1,24 @@
 package com.nik.weather_app;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class FragmentSetting extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-
-    private OnFragmentInteractionListener mListener;
-
+    private List<String> cities;
     public FragmentSetting() {
         // Required empty public constructor
     }
@@ -42,23 +39,33 @@ public class FragmentSetting extends Fragment {
         return inflater.inflate(R.layout.fragment_setting, container, false);
     }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        Spinner spinner = view.findViewById(R.id.spinner_cities);
+        cities.add(0, "Another city...");
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(),
+                                        android.R.layout.simple_spinner_item, cities);
+        spinner.setAdapter(adapter);
+    }
     // TODO: Rename method, update argument and hook method into UI event
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
+
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
+
+    }
+
+    List<String> getCities(List<String> cities) {
+        this.cities = cities;
+        return cities;
     }
 
     /**
@@ -72,7 +79,6 @@ public class FragmentSetting extends Fragment {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+
     }
 }

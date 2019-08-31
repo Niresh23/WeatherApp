@@ -1,9 +1,18 @@
 package com.nik.weather_app;
 
+import android.Manifest;
 import android.content.DialogInterface;
+import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
-import android.net.Uri;
+
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
+
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -11,10 +20,13 @@ import android.text.InputType;
 import android.view.View;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.view.GravityCompat;
 import androidx.appcompat.app.ActionBarDrawerToggle;
+
 import android.view.MenuItem;
+
 import com.google.android.material.navigation.NavigationView;
 import com.nik.weather_app.dataBase.DataBaseHelper;
 import com.nik.weather_app.dataBase.WeatherTable;
@@ -31,7 +43,9 @@ import android.view.Menu;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -40,13 +54,9 @@ import retrofit2.Response;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, FragmentSetting.OnFragmentInteractionListener {
     //Переделать
-    private String currentCity; //Переделать
-    //Переделать
-    private DrawerLayout drawer;
-    private NavigationView navigationView;
-    private ActionBarDrawerToggle toggle;
-    FloatingActionButton fab;
+    private String currentCity;
     private MenuListAdapter adapter = null;
+    private String MSG_NO_DATA = "Нет данных";
 
     //Работа с фрагментами
     private FragmentMain fragmentMain = new FragmentMain();
@@ -57,22 +67,104 @@ public class MainActivity extends AppCompatActivity
     //База данных
     SQLiteDatabase database;
     //
+
+    //Геоданные
+    private LocationManager mLocManager = null;
+    private LocListener mLocListener = null;
+
+    //
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
-        initDatabase();
-        initDrawerLayout(toolbar);
         setSupportActionBar(toolbar);
         initFloatingAction();
+        initDrawerLayout(toolbar);
+
+        //Работа с геоданными
+        mLocManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        Location loc;
+        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    Activity#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for Activity#requestPermissions for more details.
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
+                                Manifest.permission.ACCESS_COARSE_LOCATION}, 100);
+        } else {
+
+            loc = mLocManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
+            if(loc != null) {
+                Toast.makeText(getApplicationContext(), getCityByLoc(loc), Toast.LENGTH_SHORT)
+                        .show();
+            }
+        }
+
+
+        //
+
         if(savedInstanceState == null) openFragment(fragmentMain);
+        initDatabase();
+        fragmentSetting.getCities(WeatherTable.getCities(database));
+    }
+
+    private String getCityByLoc(Location loc) {
+
+        final Geocoder geo = new Geocoder(this);
+
+        // Try to get addresses list
+        List<Address> list;
+        try {
+            list = geo.getFromLocation(loc.getLatitude(), loc.getLongitude(), 1);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return e.getLocalizedMessage();
+        }
+
+        // If list is empty, return "No data" string
+        if (list.isEmpty()) return MSG_NO_DATA;
+
+        // Get first element from List
+        Address a = list.get(0);
+
+        // Get a Postal Code
+        final int index = a.getMaxAddressLineIndex();
+        String postal = null;
+        if (index >= 0) {
+            postal = a.getAddressLine(index);
+        }
+
+        // Make address string
+        StringBuilder builder = new StringBuilder();
+        final String sep = ", ";
+        builder.append(postal).append(sep)
+                .append(a.getCountryName()).append(sep)
+                .append(a.getAdminArea()).append(sep)
+                .append(a.getThoroughfare()).append(sep)
+                .append(a.getSubThoroughfare());
+
+        return builder.toString();
+    }
+
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                                                @NonNull int[] grantResults) {
+        if(requestCode == 100) {
+            boolean permissionsGranted = (grantResults.length > 1 && grantResults[1] == PackageManager.PERMISSION_GRANTED)
+                    && (grantResults[0] == PackageManager.PERMISSION_GRANTED);
+            if(permissionsGranted) recreate();
+        }
     }
 
     private void initDatabase() {
         database = new DataBaseHelper(getApplicationContext()).getWritableDatabase();
     }
-    //ОТкрытие фрагментов
+    //Открытие фрагментов
     private void openFragment(Fragment fragment) {
         fragmentManager.beginTransaction()
                 .replace(R.id.fragment_layout, fragment)
@@ -81,9 +173,10 @@ public class MainActivity extends AppCompatActivity
 
     //Инициализация окружения
     private void initDrawerLayout(Toolbar toolbar) {
-        drawer = findViewById(R.id.drawer_layout);
-        navigationView = findViewById(R.id.nav_view);
-        toggle = new ActionBarDrawerToggle(
+
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
@@ -91,7 +184,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void initFloatingAction() {
-        fab = findViewById(R.id.fab);
+        FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -197,18 +290,18 @@ public class MainActivity extends AppCompatActivity
             public void onClick(DialogInterface dialog, int which) {
                 currentCity = input.getText().toString().toUpperCase();
                 if(WeatherTable.containsCity(database, currentCity)) {
+                    Toast.makeText(getApplicationContext(), currentCity + " is in the data base", Toast.LENGTH_SHORT)
+                            .show();
                     HashMap<String, String> information = WeatherTable.getInformationByCity(database, currentCity);
+                    renderWeather(information);
                 } else {
+                    Toast.makeText(getApplicationContext(), currentCity + " is not in the data base", Toast.LENGTH_SHORT)
+                            .show();
                     updateWeatherData(currentCity);
                 }
             }
         });
         builder.show();
-    }
-
-    @Override
-    public void onFragmentInteraction(Uri uri) {
-
     }
 
     private void updateWeatherData(final String city) {
@@ -231,11 +324,50 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void renderWeather(WeatherRequestRestModel model) {
+        if(WeatherTable.containsCity(database, currentCity)) {
+            Toast.makeText(getApplicationContext(), currentCity + " was update in the database", Toast.LENGTH_SHORT)
+                    .show();
+            WeatherTable.update(database, model.name, model.sys.country, model.weather[0].description,
+                    model.main.humidity, model.main.pressure, model.main.temp, model.dt, model.weather[0].id,
+                    model.sys.sunrise, model.sys.sunset);
+        } else {
+            Toast.makeText(getApplicationContext(), currentCity + " was add in the database", Toast.LENGTH_SHORT)
+                    .show();
+            WeatherTable.addRec(database, model.name.toUpperCase(), model.sys.country, model.weather[0].description,
+                    model.main.humidity, model.main.pressure, model.main.temp, model.dt, model.weather[0].id,
+                    model.sys.sunrise, model.sys.sunset);
+        }
         fragmentMain.setPlaceName(model.name, model.sys.country);
         fragmentMain.setDetails(model.weather[0].description, model.main.humidity, model.main.pressure);
         fragmentMain.setCurrentTemp(model.main.temp);
         fragmentMain.setUpdateText(model.dt);
         fragmentMain.setWeatherIcon(model.weather[0].id, model.sys.sunrise * 1000,
                 model.sys.sunset * 1000);
+    }
+
+    private void renderWeather(HashMap<String, String> information) {
+        fragmentMain.setPlaceName(information.get("city"), information.get("country"));
+        fragmentMain.setDetails(information.get("description"), Float.parseFloat(information.get("humidity")), Float.parseFloat(information.get("pressure")));
+        fragmentMain.setCurrentTemp(Float.parseFloat(information.get("temperature")));
+        fragmentMain.setUpdateText(Long.parseLong(information.get("update")));
+        fragmentMain.setWeatherIcon(Integer.parseInt(information.get("icon")), Long.parseLong(information.get("sunrise")) * 1000,
+                Long.parseLong(information.get("sunset")) * 1000);
+    }
+
+    private class LocListener implements LocationListener {
+
+        @Override
+        public void onLocationChanged(Location location) {
+
+        }
+
+        @Override
+        public void onStatusChanged(String s, int i, Bundle bundle) {/*Empty*/}
+
+        @Override
+        public void onProviderEnabled(String s) {/*Empty*/}
+
+        @Override
+        public void onProviderDisabled(String s) {/*Empty*/}
     }
 }
