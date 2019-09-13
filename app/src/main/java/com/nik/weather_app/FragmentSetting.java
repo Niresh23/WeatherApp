@@ -10,15 +10,17 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
 public class FragmentSetting extends Fragment {
+    private OnCitySelectedListener mOnCitySelectedListener;
     private List<String> cities;
+    private Spinner spinner;
     public FragmentSetting() {
         // Required empty public constructor
     }
@@ -42,19 +44,46 @@ public class FragmentSetting extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        Spinner spinner = view.findViewById(R.id.spinner_cities);
-        cities.add(0, "Another city...");
+        spinner = view.findViewById(R.id.spinner_cities);
+        cities.add(0, "");
+        cities.add(1, "Another city...");
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(),
                                         android.R.layout.simple_spinner_item, cities);
+
         spinner.setAdapter(adapter);
+        spinner.setSelection(0);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                mOnCitySelectedListener.citySelected(i);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
     }
     // TODO: Rename method, update argument and hook method into UI event
+
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        try{
+            mOnCitySelectedListener = (OnCitySelectedListener) context;
+        } catch(ClassCastException e) {
+            throw new ClassCastException(context.toString() + "must implement" +
+                    "OnCitySelected interface");
+        }
 
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        spinner.setSelection(cities.size());
     }
 
     @Override
@@ -68,6 +97,8 @@ public class FragmentSetting extends Fragment {
         return cities;
     }
 
+
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -78,7 +109,8 @@ public class FragmentSetting extends Fragment {
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnFragmentInteractionListener {
-
+    public interface OnCitySelectedListener {
+        void citySelected(int cityID);
     }
+
 }

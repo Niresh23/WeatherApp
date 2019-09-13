@@ -1,6 +1,7 @@
 package com.nik.weather_app;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
@@ -13,10 +14,12 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 
+
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
 import android.text.InputType;
+import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -46,22 +49,27 @@ import android.widget.Toast;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, FragmentSetting.OnFragmentInteractionListener {
+        implements NavigationView.OnNavigationItemSelectedListener, FragmentSetting.OnCitySelectedListener,
+FragmentMain.GetDataListener{
+
+    private Map<String, Fragment.SavedState> fragmentSavedStates = new HashMap<>();
+
     //Переделать
     private String currentCity;
     private MenuListAdapter adapter = null;
     private String MSG_NO_DATA = "Нет данных";
 
     //Работа с фрагментами
+    private final FragmentManager fragmentManager = getSupportFragmentManager();
     private FragmentMain fragmentMain = new FragmentMain();
     private FragmentSetting fragmentSetting = new FragmentSetting();
-    private final FragmentManager fragmentManager = getSupportFragmentManager();
     //
 
     //База данных
@@ -69,11 +77,12 @@ public class MainActivity extends AppCompatActivity
     //
 
     //Геоданные
+    private String TAG = "LOCATION";
     private LocationManager mLocManager = null;
     private LocListener mLocListener = null;
-
     //
-    @RequiresApi(api = Build.VERSION_CODES.M)
+
+    @SuppressLint("MissingPermission")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,38 +91,79 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
         initFloatingAction();
         initDrawerLayout(toolbar);
+        initDatabase();
 
-        //Работа с геоданными
-        mLocManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        Location loc;
-        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    Activity#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for Activity#requestPermissions for more details.
-            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
-                                Manifest.permission.ACCESS_COARSE_LOCATION}, 100);
+        if(savedInstanceState != null){
+            fragmentMain = (FragmentMain) getSupportFragmentManager()
+                            .getFragment(savedInstanceState, "fragmentMain");
+            openFragment(fragmentMain);
         } else {
-
-            loc = mLocManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
-            if(loc != null) {
-                Toast.makeText(getApplicationContext(), getCityByLoc(loc), Toast.LENGTH_SHORT)
-                        .show();
-            }
+            Toast.makeText(getApplicationContext(),"savedInstanceState is null!!", Toast.LENGTH_SHORT)
+                    .show();
+            openFragment(fragmentMain);
         }
 
 
-        //
-
-        if(savedInstanceState == null) openFragment(fragmentMain);
-        initDatabase();
-        fragmentSetting.getCities(WeatherTable.getCities(database));
+        //Работа с геоданными
+        mLocManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        Location loc = getLastKnownLocation();
+        if(loc != null) {
+            currentCity = getCityByLoc(loc);
+            Toast.makeText(getApplicationContext(), currentCity, Toast.LENGTH_SHORT)
+                    .show();
+            updateWeatherData(currentCity);
+        }
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        fragmentManager.putFragment(outState, "fragmentMain", fragmentMain);
+    }
+
+    @SuppressLint("MissingPermission")
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(mLocListener == null) mLocListener = new LocListener();
+        mLocManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+                3000L, 50000.0F, mLocListener);
+    }
+
+    @Override
+    protected void onPause() {
+        if(mLocListener != null) mLocManager.removeUpdates(mLocListener);
+        super.onPause();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    private Location getLastKnownLocation() {
+        mLocManager = (LocationManager)getApplicationContext().getSystemService(LOCATION_SERVICE);
+        List<String> providers = mLocManager.getProviders(true);
+        Location bestLocation = null;
+        for(String provider : providers) {
+            Location loc = null;
+            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                    checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    Activity#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for Activity#requestPermissions for more details.
+                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION}, 100);
+            } else {
+                loc = mLocManager.getLastKnownLocation(provider);
+            }
+            if(loc == null) continue;
+            if(bestLocation == null || loc.getAccuracy() < bestLocation.getAccuracy()) {
+                bestLocation = loc;
+            }
+        }
+        return bestLocation;
+    }
     private String getCityByLoc(Location loc) {
 
         final Geocoder geo = new Geocoder(this);
@@ -135,21 +185,12 @@ public class MainActivity extends AppCompatActivity
 
         // Get a Postal Code
         final int index = a.getMaxAddressLineIndex();
-        String postal = null;
+        String city = null;
         if (index >= 0) {
-            postal = a.getAddressLine(index);
+            city = a.getLocality();
         }
 
-        // Make address string
-        StringBuilder builder = new StringBuilder();
-        final String sep = ", ";
-        builder.append(postal).append(sep)
-                .append(a.getCountryName()).append(sep)
-                .append(a.getAdminArea()).append(sep)
-                .append(a.getThoroughfare()).append(sep)
-                .append(a.getSubThoroughfare());
-
-        return builder.toString();
+        return city;
     }
 
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
@@ -168,7 +209,7 @@ public class MainActivity extends AppCompatActivity
     private void openFragment(Fragment fragment) {
         fragmentManager.beginTransaction()
                 .replace(R.id.fragment_layout, fragment)
-                .addToBackStack("").commit();
+                .addToBackStack(null).commit();
     }
 
     //Инициализация окружения
@@ -265,7 +306,10 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_tools) {
             Toast.makeText(getApplicationContext(), getString(R.string.menu_tools), Toast.LENGTH_SHORT)
                     .show();
+            fragmentSavedStates.put("fragmentMain",fragmentManager.saveFragmentInstanceState(fragmentMain));
+            fragmentSetting.getCities(WeatherTable.getCities(database));
             openFragment(fragmentSetting);
+            //openFragment(fragmentSetting);
         } else if (id == R.id.nav_share) {
             Toast.makeText(getApplicationContext(), getString(R.string.nav_header_title), Toast.LENGTH_SHORT)
                     .show();
@@ -278,7 +322,10 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
+    //Ввод нового города
     private void showInputDialog() {
+        if(!fragmentMain.isVisible()) openFragment(fragmentMain);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.change_city);
 
@@ -303,6 +350,7 @@ public class MainActivity extends AppCompatActivity
         });
         builder.show();
     }
+    //
 
     private void updateWeatherData(final String city) {
         OpenWeatherRepo.getSingletone().getAPI().loadWeather(city + ",ru",
@@ -354,11 +402,25 @@ public class MainActivity extends AppCompatActivity
                 Long.parseLong(information.get("sunset")) * 1000);
     }
 
+    @Override
+    public void citySelected(int cityID) {
+        if(cityID == 1) showInputDialog();
+        else if (cityID > 1){
+            currentCity = WeatherTable.getCityById(database, cityID - 1);
+            updateWeatherData(currentCity);
+        }
+    }
+
+    @Override
+    public void getData() {
+        updateWeatherData(currentCity);
+    }
+
     private class LocListener implements LocationListener {
 
         @Override
         public void onLocationChanged(Location location) {
-
+            Log.d(TAG, "onLocationChanged" + location.toString());
         }
 
         @Override

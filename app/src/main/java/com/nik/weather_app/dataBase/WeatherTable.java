@@ -23,7 +23,7 @@ public class WeatherTable {
     private final static String COLUMN_ICON = "icon";
 
 
-    static void createTable(SQLiteDatabase database) {
+    public static void createTable(SQLiteDatabase database) {
         database.execSQL("CREATE TABLE " + TABLE_NAME + " (" + COLUMN_ID
                 + " INTEGER PRIMARY KEY AUTOINCREMENT," +COLUMN_COUNTRY + " TEXT, " +
                 COLUMN_CITY + " TEXT,"  + COLUMN_DESCRIPTION + " TEXT," +
@@ -93,13 +93,11 @@ public class WeatherTable {
 
     public static void deleteAll(SQLiteDatabase database) {
         database.delete(TABLE_NAME, null, null);
-        //DELETE * FROM Notes
     }
 
     public static List<String> getAllNotes(SQLiteDatabase database) {
         Cursor cursor = database.query(TABLE_NAME, null, null, null,
                 null, null, null);
-        //Cursor cursor = database.rawQuery("SELECT * FROM " + TABLE_NAME, null);
         return getResultFromCursor(cursor);
     }
 
@@ -110,14 +108,18 @@ public class WeatherTable {
     }
 
     public static boolean containsCity(SQLiteDatabase database ,String city) {
-        String cityInDatabase = getCities(database).toString();
         return getCities(database).contains(city.toUpperCase());
     }
-
+    public static String getCityById(SQLiteDatabase database, int id) {
+        Cursor cursor = database.query(TABLE_NAME, new String[]{COLUMN_CITY},
+                COLUMN_ID + " =?",
+                new String[]{id + ""},null, null, null, null);
+        return getResultFromCursor(cursor).get(0);
+    }
     private static List<String> getResultFromCursor(Cursor cursor) {
         List<String> result = null;
 
-        if(cursor != null && cursor.moveToFirst()) {//попали на первую запись, плюс вернулось true, если запись есть
+        if(cursor != null && cursor.moveToFirst() && !cursor.isClosed()) {//попали на первую запись, плюс вернулось true, если запись есть
             result = new ArrayList<>(cursor.getCount());
 
             int townIndex = cursor.getColumnIndex(COLUMN_CITY);
@@ -125,7 +127,6 @@ public class WeatherTable {
                 result.add(cursor.getString(townIndex));
             } while (cursor.moveToNext());
         }
-
         try { cursor.close(); } catch (Exception ignored) {}
         return result == null ? new ArrayList<String>(0) : result;
     }

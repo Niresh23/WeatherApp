@@ -1,6 +1,7 @@
 package com.nik.weather_app;
 
 
+import android.content.Context;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -27,31 +28,59 @@ public class FragmentMain extends Fragment {
     private TextView updateTextView;
     private TextView weatherIconTextView;
 
+    private GetDataListener mGetDataListener;
+
     public FragmentMain() {
         // Required empty public constructor
     }
-
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_main, container, false);
-
-    }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+        View view = inflater.inflate(R.layout.fragment_main, container, false);
         cityTextView = view.findViewById(R.id.text_view_city);
         detailsTextView = view.findViewById(R.id.text_view_details);
         currentTemperatureTextView = view.findViewById(R.id.text_view_current_temperature);
         updateTextView = view.findViewById(R.id.text_view_update);
         weatherIconTextView = view.findViewById(R.id.text_view_weather_icon);
+
+        if(savedInstanceState == null) mGetDataListener.getData();
+        return view;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        mGetDataListener.getData();
+        super.onViewCreated(view, savedInstanceState);
+
+    }
+
+//    @Override
+//    public void onSaveInstanceState(@NonNull Bundle outState) {
+//        if(outState == null) outState = new Bundle();
+//        outState.putString("cityText", cityText);
+//        outState.putString("detailsText", detailsText);
+//        outState.putString("currentText", currentText);
+//        outState.putString("updateText", updatedText);
+//        outState.putString("icon", icon);
+//        super.onSaveInstanceState(outState);
+//    }
+
+    @Override
+    public void onAttach(Context context) {
+        try{
+            mGetDataListener = (GetDataListener) context;
+        } catch(ClassCastException e) {
+            throw new ClassCastException(context.toString() + " must implement " +
+                    "GetDataListener interface");
+        }
+        super.onAttach(context);
     }
 
     void setPlaceName(String name, String country) {
         String cityText = name.toUpperCase() + ", " + country;
+        if(cityTextView != null)
         cityTextView.setText(cityText);
     }
     void setDetails(String description, float humidity, float pressure) {
@@ -62,9 +91,9 @@ public class FragmentMain extends Fragment {
     }
 
     void setCurrentTemp(float temp) {
-        String currentTextText = String.format(Locale.getDefault(), "%.2f", temp)
+        String currentText = String.format(Locale.getDefault(), "%.2f", temp)
                 + "\u2103";
-        currentTemperatureTextView.setText(currentTextText);
+        currentTemperatureTextView.setText(currentText);
     }
     void setUpdateText(long dt) {
         DateFormat dateFormat = DateFormat.getTimeInstance();
@@ -116,5 +145,7 @@ public class FragmentMain extends Fragment {
         }
         weatherIconTextView.setText(icon);
     }
-
+    public interface GetDataListener {
+        void getData();
+    }
 }
