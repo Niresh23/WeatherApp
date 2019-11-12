@@ -65,6 +65,8 @@ FragmentMain.GetDataListener{
     private String currentCity;
     private MenuListAdapter adapter = null;
     private String MSG_NO_DATA = "Нет данных";
+    private String[] LOCATION_PERMISSION = {Manifest.permission.ACCESS_FINE_LOCATION};
+    private static final int INITIAL_REQUEST = 1337;
 
     //Работа с фрагментами
     private final FragmentManager fragmentManager = getSupportFragmentManager();
@@ -92,7 +94,9 @@ FragmentMain.GetDataListener{
         initFloatingAction();
         initDrawerLayout(toolbar);
         initDatabase();
-
+        if(!canAccessLocation()) {
+            requestPermissions(LOCATION_PERMISSION, INITIAL_REQUEST);
+        }
         if(savedInstanceState != null){
             fragmentMain = (FragmentMain) getSupportFragmentManager()
                             .getFragment(savedInstanceState, "fragmentMain");
@@ -105,14 +109,19 @@ FragmentMain.GetDataListener{
 
 
         //Работа с геоданными
-        mLocManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        Location loc = getLastKnownLocation();
-        if(loc != null) {
-            currentCity = getCityByLoc(loc);
-            Toast.makeText(getApplicationContext(), currentCity, Toast.LENGTH_SHORT)
-                    .show();
-            updateWeatherData(currentCity);
+        if(canAccessLocation()) {
+            mLocManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+            Location loc = getLastKnownLocation();
+            if (loc != null) {
+                currentCity = getCityByLoc(loc);
+                Toast.makeText(getApplicationContext(), currentCity, Toast.LENGTH_SHORT)
+                        .show();
+                updateWeatherData(currentCity);
+            }
         }
+    }
+    private boolean canAccessLocation() {
+        return (PackageManager.PERMISSION_GRANTED == checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION));
     }
 
     @Override
