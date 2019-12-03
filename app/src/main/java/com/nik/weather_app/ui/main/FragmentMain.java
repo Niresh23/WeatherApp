@@ -1,4 +1,4 @@
-package com.nik.weather_app;
+package com.nik.weather_app.ui.main;
 
 
 import android.content.Context;
@@ -13,6 +13,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+
+import com.nik.weather_app.R;
 
 import java.text.DateFormat;
 import java.util.Date;
@@ -78,31 +80,33 @@ public class FragmentMain extends Fragment {
         super.onAttach(context);
     }
 
-    void setPlaceName(String name, String country) {
+    public void setPlaceName(String name, String country) {
         String cityText = name.toUpperCase() + ", " + country;
         if(cityTextView != null)
         cityTextView.setText(cityText);
     }
-    void setDetails(String description, float humidity, float pressure) {
+
+    public void setDetails(String description, float humidity, float pressure) {
         String detailsText = description.toUpperCase() + "\n"
                 + "Humidity: " + humidity + "%" + "\n"
                 + "Pressure:" + pressure + "hPa";
         detailsTextView.setText(detailsText);
     }
 
-    void setCurrentTemp(float temp) {
+    public void setCurrentTemp(float temp) {
         String currentText = String.format(Locale.getDefault(), "%.2f", temp)
                 + "\u2103";
         currentTemperatureTextView.setText(currentText);
     }
-    void setUpdateText(long dt) {
+
+    public void setUpdateText(long dt) {
         DateFormat dateFormat = DateFormat.getTimeInstance();
         String updateOn = dateFormat.format(new Date(dt * 1000));
         String updatedText = "Last update: " + updateOn;
         updateTextView.setText(updatedText);
     }
 
-    void setWeatherIcon(int actualId, long sunrise, long sunset) {
+    public void setWeatherIcon(int actualId, long sunrise, long sunset) {
         int id = actualId / 100;
         String icon = "";
 
@@ -145,6 +149,7 @@ public class FragmentMain extends Fragment {
         }
         weatherIconTextView.setText(icon);
     }
+
     public interface GetDataListener {
         void getData();
     }

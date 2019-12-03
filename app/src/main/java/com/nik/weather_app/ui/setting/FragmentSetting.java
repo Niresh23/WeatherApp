@@ -1,4 +1,4 @@
-package com.nik.weather_app;
+package com.nik.weather_app.ui.setting;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -14,6 +14,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
+import com.nik.weather_app.R;
+
 import java.util.List;
 
 
@@ -24,10 +26,6 @@ public class FragmentSetting extends Fragment {
     public FragmentSetting() {
         // Required empty public constructor
     }
-
-
-    // TODO: Rename and change types and number of parameters
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -86,13 +84,7 @@ public class FragmentSetting extends Fragment {
         spinner.setSelection(cities.size());
     }
 
-    @Override
-    public void onDetach() {
-        super.onDetach();
-
-    }
-
-    List<String> getCities(List<String> cities) {
+    public List<String> getCities(List<String> cities) {
         this.cities = cities;
         return cities;
     }
