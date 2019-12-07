@@ -36,7 +36,7 @@ import com.nik.weather_app.dataBase.WeatherTable;
 import com.nik.weather_app.rest.OpenWeatherRepo;
 import com.nik.weather_app.rest.entities.WeatherRequestRestModel;
 import com.nik.weather_app.ui.main.FragmentMain;
-import com.nik.weather_app.ui.setting.FragmentSetting;
+import com.nik.weather_app.ui.setting.SettingFragment;
 
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
@@ -58,7 +58,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, FragmentSetting.OnCitySelectedListener,
+        implements NavigationView.OnNavigationItemSelectedListener, SettingFragment.OnCitySelectedListener,
 FragmentMain.GetDataListener{
 
     private Map<String, Fragment.SavedState> fragmentSavedStates = new HashMap<>();
@@ -73,7 +73,7 @@ FragmentMain.GetDataListener{
     //Работа с фрагментами
     private final FragmentManager fragmentManager = getSupportFragmentManager();
     private FragmentMain fragmentMain = new FragmentMain();
-    private FragmentSetting fragmentSetting = new FragmentSetting();
+    private SettingFragment settingFragment = new SettingFragment();
     //
 
     //База данных
@@ -311,9 +311,9 @@ FragmentMain.GetDataListener{
             Toast.makeText(getApplicationContext(), getString(R.string.menu_tools), Toast.LENGTH_SHORT)
                     .show();
             fragmentSavedStates.put("fragmentMain",fragmentManager.saveFragmentInstanceState(fragmentMain));
-            fragmentSetting.getCities(WeatherTable.getCities(database));
-            openFragment(fragmentSetting);
-            //openFragment(fragmentSetting);
+//            settingFragment.getCities(WeatherTable.getCities(database));
+            openFragment(settingFragment);
+            //openFragment(settingFragment);
         } else if (id == R.id.nav_share) {
             Toast.makeText(getApplicationContext(), getString(R.string.nav_header_title), Toast.LENGTH_SHORT)
                     .show();

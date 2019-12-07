@@ -6,7 +6,12 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
 
+import android.transition.CircularPropagation;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,21 +20,20 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
 import com.nik.weather_app.R;
+import com.nik.weather_app.data.CitiesRepository;
 
 import java.util.List;
 
 
-public class FragmentSetting extends Fragment {
+public class SettingFragment extends Fragment {
+
     private OnCitySelectedListener mOnCitySelectedListener;
     private List<String> cities;
     private Spinner spinner;
-    public FragmentSetting() {
-        // Required empty public constructor
-    }
+    SettingViewModel viewModel;
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public SettingFragment() {
+        // Required empty public constructor
     }
 
     @Override
@@ -40,15 +44,20 @@ public class FragmentSetting extends Fragment {
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable final Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        Log.d("SettingFragment", "onViewCreated()");
+        viewModel = ViewModelProviders.of(this).get(SettingViewModel.class);
+        viewModel.getLiveData().observeForever(new Observer<SettingViewState>() {
+            @Override
+            public void onChanged(SettingViewState settingViewState) {
+                Log.d("onChanged()", "done");
+                cities = settingViewState.getCities();
+            }
+        });
         spinner = view.findViewById(R.id.spinner_cities);
-        cities.add(0, "");
-        cities.add(1, "Another city...");
-
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(),
                                         android.R.layout.simple_spinner_item, cities);
-
         spinner.setAdapter(adapter);
         spinner.setSelection(0);
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -84,10 +93,15 @@ public class FragmentSetting extends Fragment {
         spinner.setSelection(cities.size());
     }
 
-    public List<String> getCities(List<String> cities) {
-        this.cities = cities;
-        return cities;
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        Log.d("SettingFragment", "onViewCreated()");
     }
+    //    public List<String> getCities(List<String> cities) {
+//        this.cities = cities;
+//        return cities;
+//    }
 
 
 
