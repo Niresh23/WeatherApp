@@ -58,7 +58,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, SettingFragment.OnCitySelectedListener,
+        implements SettingFragment.OnCitySelectedListener,
 FragmentMain.GetDataListener{
 
     private Map<String, Fragment.SavedState> fragmentSavedStates = new HashMap<>();
@@ -218,14 +218,11 @@ FragmentMain.GetDataListener{
 
     //Инициализация окружения
     private void initDrawerLayout(Toolbar toolbar) {
-
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        NavigationView navigationView = findViewById(R.id.nav_view);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
-        navigationView.setNavigationItemSelectedListener(this);
     }
 
     private void initFloatingAction() {
@@ -282,49 +279,15 @@ FragmentMain.GetDataListener{
 
                 break;
             }
-            case R.id.action_help: {
-
+            case R.id.action_help:
                 break;
-            }
+
             default: {
                 Toast.makeText(getApplicationContext(), "Prekrasoe daleko", Toast.LENGTH_SHORT)
                         .show();
             }
         }
         return super.onOptionsItemSelected(item);
-    }
-
-
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
-
-        if (id == R.id.nav_home) {
-            Toast.makeText(this, getResources().getString(R.string.menu_home), Toast.LENGTH_SHORT).show();
-            openFragment(fragmentMain);
-        } else if (id == R.id.nav_gallery) {
-            showInputDialog();
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_tools) {
-            Toast.makeText(getApplicationContext(), getString(R.string.menu_tools), Toast.LENGTH_SHORT)
-                    .show();
-            fragmentSavedStates.put("fragmentMain",fragmentManager.saveFragmentInstanceState(fragmentMain));
-//            settingFragment.getCities(WeatherTable.getCities(database));
-            openFragment(settingFragment);
-            //openFragment(settingFragment);
-        } else if (id == R.id.nav_share) {
-            Toast.makeText(getApplicationContext(), getString(R.string.nav_header_title), Toast.LENGTH_SHORT)
-                    .show();
-        } else if (id == R.id.nav_send) {
-            Toast.makeText(getApplicationContext(), getString(R.string.menu_tools), Toast.LENGTH_SHORT)
-                    .show();
-        }
-
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
     }
 
     //Ввод нового города
