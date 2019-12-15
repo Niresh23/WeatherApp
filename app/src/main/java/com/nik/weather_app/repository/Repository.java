@@ -2,11 +2,16 @@ package com.nik.weather_app.repository;
 
 import android.app.Application;
 
-import androidx.room.Database;
+import androidx.room.RoomDatabase;
 
 public class Repository {
 
-    public Repository(Application app, Database database) {
+    private RoomDatabase database;
 
+    public Repository(RoomDatabase database) {
+        this.database = database;
     }
+
+
+
 }

@@ -1,4 +1,4 @@
-package com.nik.weather_app.room_database;
+package com.nik.weather_app.cities_db;
 
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;

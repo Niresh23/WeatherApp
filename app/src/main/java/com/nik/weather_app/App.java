@@ -4,7 +4,7 @@ import android.app.Application;
 
 import androidx.room.Room;
 
-import com.nik.weather_app.room_database.WeatherDatabase;
+import com.nik.weather_app.cities_db.WeatherDatabase;
 
 public class App extends Application {
     private final String DATABASE_NAME = "Weather Database";
