@@ -15,16 +15,13 @@ import java.util.List;
 public class SettingViewModel extends ViewModel {
     private MutableLiveData<SettingViewState> viewStateLiveData = new MutableLiveData<>();
     private LiveData<List<String>> repositoryLveData = CitiesRepository.getRepository().getLiveData();
-    private final Observer<List<String>> observer = new Observer<List<String>>() {
-        @Override
-        public void onChanged(List<String> strings) {
-            Log.d("SettingViewModel","onChanged()");
-            viewStateLiveData.setValue(new SettingViewState(strings));
-        }
+    private final Observer<List<String>> observer = strings -> {
+        Log.d("SettingViewModel","onChanged()");
+        viewStateLiveData.setValue(new SettingViewState(strings));
     };
 
     public SettingViewModel() {
-        Log.d("SettingViewModel","Consctructor()");
+        Log.d("SettingViewModel","Constructor()");
         repositoryLveData.observeForever(observer);
 }
 
