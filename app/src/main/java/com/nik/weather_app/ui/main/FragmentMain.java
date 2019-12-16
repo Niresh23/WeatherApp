@@ -6,6 +6,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -15,6 +16,7 @@ import android.widget.TextView;
 
 
 import com.nik.weather_app.R;
+import com.nik.weather_app.databinding.FragmentMainBinding;
 
 import java.text.DateFormat;
 import java.util.Date;
@@ -39,16 +41,10 @@ public class FragmentMain extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_main, container, false);
-        cityTextView = view.findViewById(R.id.text_view_city);
-        detailsTextView = view.findViewById(R.id.text_view_details);
-        currentTemperatureTextView = view.findViewById(R.id.text_view_current_temperature);
-        updateTextView = view.findViewById(R.id.text_view_update);
-        weatherIconTextView = view.findViewById(R.id.text_view_weather_icon);
-
+        FragmentMainBinding binding = DataBindingUtil.inflate(inflater, R.layout.fragment_main,
+                                                                container,false);
         if(savedInstanceState == null) mGetDataListener.getData();
-        return view;
+        return binding.getRoot();
     }
 
     @Override
@@ -57,17 +53,6 @@ public class FragmentMain extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
     }
-
-//    @Override
-//    public void onSaveInstanceState(@NonNull Bundle outState) {
-//        if(outState == null) outState = new Bundle();
-//        outState.putString("cityText", cityText);
-//        outState.putString("detailsText", detailsText);
-//        outState.putString("currentText", currentText);
-//        outState.putString("updateText", updatedText);
-//        outState.putString("icon", icon);
-//        super.onSaveInstanceState(outState);
-//    }
 
     @Override
     public void onAttach(Context context) {

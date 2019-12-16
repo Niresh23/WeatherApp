@@ -1,58 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/sea"
-    tools:context=".ui.main.FragmentMain">
-
-    <!-- TODO: Update blank fragment layout -->
-
-    <LinearLayout
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+    <data>
+        <variable
+            name="weather"
+            type="com.nik.weather_app.data.Weather" />
+    </data>
+    <FrameLayout
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_height="match_parent"
+        android:background="@drawable/sea"
+        tools:context=".ui.main.FragmentMain">
 
-        <TextView
-            android:id="@+id/text_view_city"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text=""
-            android:textSize="42sp" />
+        <LinearLayout
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content"
+         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/text_view_update"
-            android:layout_width="match_parent"
-            android:layout_height="55sp"
-            android:gravity="center_horizontal"
-            android:text="" />
+            <TextView
+                android:id="@+id/text_view_city"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@{weather.city}"
+                android:textSize="42sp" />
+            <TextView
+                android:id="@+id/text_view_update"
+                android:layout_width="match_parent"
+                android:layout_height="55sp"
+                android:gravity="center_horizontal"
+                android:text="@{weather.updated}" />
 
-        <TextView
-            android:id="@+id/text_view_weather_icon"
-            android:layout_width="match_parent"
-            android:layout_height="99dp"
-            android:fontFamily="@font/weather"
-            android:gravity="center_horizontal"
-            android:text="@string/weather_clear_night"
-            android:textSize="42sp" />
+            <TextView
+                android:id="@+id/text_view_weather_icon"
+                android:layout_width="match_parent"
+                android:layout_height="99dp"
+                android:fontFamily="@font/weather"
+                android:gravity="center_horizontal"
+                android:text="@{weather.icon}"
+                android:textSize="42sp" />
 
-        <TextView
-            android:id="@+id/text_view_details"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text=""
-            android:textSize="14sp" />
+            <TextView
+                android:id="@+id/text_view_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@{weather.description}"
+                android:textSize="14sp" />
 
-        <TextView
-            android:id="@+id/text_view_current_temperature"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:text=""
-            android:textSize="42sp" />
+            <TextView
+                android:id="@+id/text_view_humidity"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@{weather.humidity}"
+                android:textSize="14sp" />
 
-    </LinearLayout>
+            <TextView
+                android:id="@+id/text_view_pressure"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@{weather.pressure}"
+                android:textSize="14sp" />
 
-</FrameLayout>
+            <TextView
+                android:id="@+id/text_view_current_temperature"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:text="@{weather.temperature}"
+                android:textSize="42sp" />
+
+        </LinearLayout>
+    </FrameLayout>
+</layout>
