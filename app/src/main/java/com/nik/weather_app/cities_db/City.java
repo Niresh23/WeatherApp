@@ -8,7 +8,7 @@ import androidx.room.PrimaryKey;
 /* (SQLiteDatabase database, String city, String country, String description, float humidity,
                               float pressure, float temperature, long update, long icon, long sunrise, long sunset)*/
 @Entity
-public class Weather {
+public class City {
 
     @NonNull
     @PrimaryKey
