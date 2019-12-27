@@ -8,6 +8,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,6 +35,8 @@ public class FragmentMain extends Fragment {
     private TextView weatherIconTextView;
 
     private GetDataListener mGetDataListener;
+    FragmentMainBinding binding;
+    FragmentMainViewModel viewModel;
 
     public FragmentMain() {
         // Required empty public constructor
@@ -41,8 +45,10 @@ public class FragmentMain extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        FragmentMainBinding binding = DataBindingUtil.inflate(inflater, R.layout.fragment_main,
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_main,
                                                                 container,false);
+        viewModel = ViewModelProviders.of(this).get(FragmentMainViewModel.class);
+
         if(savedInstanceState == null) mGetDataListener.getData();
         return binding.getRoot();
     }
@@ -51,88 +57,17 @@ public class FragmentMain extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         mGetDataListener.getData();
         super.onViewCreated(view, savedInstanceState);
-
     }
 
     @Override
-    public void onAttach(Context context) {
-        try{
+    public void onAttach(@NonNull Context context) {
+        try {
             mGetDataListener = (GetDataListener) context;
         } catch(ClassCastException e) {
             throw new ClassCastException(context.toString() + " must implement " +
                     "GetDataListener interface");
         }
         super.onAttach(context);
-    }
-
-    public void setPlaceName(String name, String country) {
-        String cityText = name.toUpperCase() + ", " + country;
-        if(cityTextView != null)
-        cityTextView.setText(cityText);
-    }
-
-    public void setDetails(String description, float humidity, float pressure) {
-        String detailsText = description.toUpperCase() + "\n"
-                + "Humidity: " + humidity + "%" + "\n"
-                + "Pressure:" + pressure + "hPa";
-        detailsTextView.setText(detailsText);
-    }
-
-    public void setCurrentTemp(float temp) {
-        String currentText = String.format(Locale.getDefault(), "%.2f", temp)
-                + "\u2103";
-        currentTemperatureTextView.setText(currentText);
-    }
-
-    public void setUpdateText(long dt) {
-        DateFormat dateFormat = DateFormat.getTimeInstance();
-        String updateOn = dateFormat.format(new Date(dt * 1000));
-        String updatedText = "Last update: " + updateOn;
-        updateTextView.setText(updatedText);
-    }
-
-    public void setWeatherIcon(int actualId, long sunrise, long sunset) {
-        int id = actualId / 100;
-        String icon = "";
-
-        if(actualId == 800) {
-            long currentTime = new Date().getTime();
-            if(currentTime >= sunrise && currentTime < sunset) {
-                icon = "\u2600";
-                //icon = getString(R.string.weather_sunny);
-            } else {
-                icon = getString(R.string.weather_clear_night);
-            }
-        } else {
-            switch (id) {
-                case 2: {
-                    icon = getString(R.string.weather_thunder);
-                    break;
-                }
-                case 3: {
-                    icon = getString(R.string.weather_drizzle);
-                    break;
-                }
-                case 5: {
-                    icon = getString(R.string.weather_rainy);
-                    break;
-                }
-                case 6: {
-                    icon = getString(R.string.weather_snowy);
-                    break;
-                }
-                case 7: {
-                    icon = getString(R.string.weather_foggy);
-                    break;
-                }
-                case 8: {
-                    icon = "\u2601";
-                    // icon = getString(R.string.weather_cloudy);
-                    break;
-                }
-            }
-        }
-        weatherIconTextView.setText(icon);
     }
 
     public interface GetDataListener {

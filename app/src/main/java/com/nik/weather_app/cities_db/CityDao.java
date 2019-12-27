@@ -17,16 +17,16 @@ import io.reactivex.Single;
 public interface CityDao {
 
     @Query("SELECT * FROM City ORDER BY id")
-    LiveData<List<City>> getAll();
+    Single<List<City>> getAll();
 
-    @Query("SELECT * FROM  City WHERE id IN (:weatherIds)")
-    LiveData<List<City>> loadByIds(int[] weatherIds);
+    @Query("SELECT * FROM  City WHERE id IN (:cityIds)")
+    Single<List<City>> loadByIds(int[] cityIds);
 
     @Query("SELECT * FROM City WHERE CITY LIKE :city LIMIT 1")
-    LiveData<City> loadByCity(String city);
+    Single<City> loadByCity(String city);
 
     @Query("SELECT city FROM City ORDER BY city")
-    LiveData<List<String>> loadCities();
+    Single<List<String>> loadCities();
 
     @Delete
     Single<Integer> delete(City city);
@@ -35,6 +35,6 @@ public interface CityDao {
     Completable add(City city);
 
     @Update
-    Completable updateWeather(City city);
+    Completable updateCity(City city);
 
 }

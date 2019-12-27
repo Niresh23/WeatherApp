@@ -2,8 +2,8 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
     <data>
         <variable
-            name="city"
-            type="com.nik.weather_app.ui.main.FragmentMainViewModel" />
+            name="weather"
+            type="com.nik.weather_app.data.Weather" />
     </data>
     <FrameLayout
         xmlns:tools="http://schemas.android.com/tools"
@@ -22,22 +22,21 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="@{city.city}"
+                android:text="@{weather.city}"
                 android:textSize="42sp" />
             <TextView
                 android:id="@+id/text_view_update"
                 android:layout_width="match_parent"
                 android:layout_height="55sp"
                 android:gravity="center_horizontal"
-                android:text="@{city.updated}" />
+                android:text="@{weather.updated}" />
 
             <TextView
                 android:id="@+id/text_view_weather_icon"
                 android:layout_width="match_parent"
                 android:layout_height="99dp"
-                android:fontFamily="@font/city"
                 android:gravity="center_horizontal"
-                android:text="@{city.icon}"
+                android:text="@{weather.icon}"
                 android:textSize="42sp" />
 
             <TextView
@@ -45,7 +44,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="@{city.description}"
+                android:text="@{weather.description}"
                 android:textSize="14sp" />
 
             <TextView
@@ -53,7 +52,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="@{city.humidity}"
+                android:text="@{weather.humidity}"
                 android:textSize="14sp" />
 
             <TextView
@@ -61,7 +60,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="@{city.pressure}"
+                android:text="@{weather.pressure}"
                 android:textSize="14sp" />
 
             <TextView
@@ -69,9 +68,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
-                android:text="@{city.temperature}"
+                android:text="@{wather.temperature}"
                 android:textSize="42sp" />
-
         </LinearLayout>
     </FrameLayout>
 </layout>

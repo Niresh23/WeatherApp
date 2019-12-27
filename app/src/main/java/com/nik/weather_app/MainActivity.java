@@ -2,9 +2,7 @@ package com.nik.weather_app;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.content.DialogInterface;
 import android.content.pm.PackageManager;
-import android.database.sqlite.SQLiteDatabase;
 
 import android.location.Address;
 import android.location.Geocoder;
@@ -16,11 +14,9 @@ import android.os.Bundle;
 
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 
 import android.text.InputType;
 import android.util.Log;
-import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -30,9 +26,9 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 
 import android.view.MenuItem;
 
-import com.google.android.material.navigation.NavigationView;
-import com.nik.weather_app.dataBase.DataBaseHelper;
-import com.nik.weather_app.dataBase.WeatherTable;
+import com.nik.weather_app.cities_db.City;
+import com.nik.weather_app.data.Weather;
+import com.nik.weather_app.repository.Repository;
 import com.nik.weather_app.rest.OpenWeatherRepo;
 import com.nik.weather_app.rest.entities.WeatherRequestRestModel;
 import com.nik.weather_app.ui.main.FragmentMain;
@@ -49,9 +45,8 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -60,8 +55,6 @@ import retrofit2.Response;
 public class MainActivity extends AppCompatActivity
         implements SettingFragment.OnCitySelectedListener,
 FragmentMain.GetDataListener{
-
-    private Map<String, Fragment.SavedState> fragmentSavedStates = new HashMap<>();
 
     //Переделать
     private String currentCity;
@@ -77,7 +70,8 @@ FragmentMain.GetDataListener{
     //
 
     //База данных
-    SQLiteDatabase database;
+    Repository repository;
+    Weather weather = new Weather();
     //
 
     //Геоданные
@@ -95,20 +89,14 @@ FragmentMain.GetDataListener{
         setSupportActionBar(toolbar);
         initFloatingAction();
         initDrawerLayout(toolbar);
-        initDatabase();
+
+        repository = new Repository(getApplication());
+
         if(!canAccessLocation()) {
             requestPermissions(LOCATION_PERMISSION, INITIAL_REQUEST);
         }
-        if(savedInstanceState != null){
-            fragmentMain = (FragmentMain) getSupportFragmentManager()
-                            .getFragment(savedInstanceState, "fragmentMain");
-            openFragment(fragmentMain);
-        } else {
-            Toast.makeText(getApplicationContext(),"savedInstanceState is null!!!", Toast.LENGTH_SHORT)
-                    .show();
-            openFragment(fragmentMain);
-        }
 
+        openFragment(fragmentMain);
 
         //Работа с геоданными
         if(canAccessLocation()) {
@@ -206,9 +194,6 @@ FragmentMain.GetDataListener{
         }
     }
 
-    private void initDatabase() {
-        database = new DataBaseHelper(getApplicationContext()).getWritableDatabase();
-    }
     //Открытие фрагментов
     private void openFragment(Fragment fragment) {
         fragmentManager.beginTransaction()
@@ -228,8 +213,7 @@ FragmentMain.GetDataListener{
     private void initFloatingAction() {
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(view ->
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show()
+                openFragment(settingFragment)
 
         );
     }
@@ -265,7 +249,7 @@ FragmentMain.GetDataListener{
             }
 
             case R.id.action_3_days: {
-                adapter.setThreeDays();
+                showInputDialog();
                 break;
             }
 
@@ -274,7 +258,7 @@ FragmentMain.GetDataListener{
                 break;
             }
             case R.id.action_settings: {
-
+                openFragment(settingFragment);
                 break;
             }
             case R.id.action_help:
@@ -293,29 +277,17 @@ FragmentMain.GetDataListener{
         if(!fragmentMain.isVisible()) openFragment(fragmentMain);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.change_city);
-
         final EditText input = new EditText(this);
         input.setInputType(InputType.TYPE_CLASS_TEXT);
         builder.setView(input);
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                currentCity = input.getText().toString().toUpperCase();
-                if(WeatherTable.containsCity(database, currentCity)) {
-                    Toast.makeText(getApplicationContext(), currentCity + " is in the data base", Toast.LENGTH_SHORT)
-                            .show();
-                    HashMap<String, String> information = WeatherTable.getInformationByCity(database, currentCity);
-                    renderWeather(information);
-                } else {
-                    Toast.makeText(getApplicationContext(), currentCity + " is not in the data base", Toast.LENGTH_SHORT)
-                            .show();
-                    updateWeatherData(currentCity);
-                }
-            }
-        });
+        builder.setPositiveButton("OK", (dialog, which) -> {
+            currentCity = input.getText().toString().toUpperCase();
+            updateWeatherData(currentCity);
+            City city = new City();
+            city.setCity(currentCity);
+            });
         builder.show();
     }
-    //
 
     private void updateWeatherData(final String city) {
         OpenWeatherRepo.getSingletone().getAPI().loadWeather(city + ",ru",
@@ -337,43 +309,60 @@ FragmentMain.GetDataListener{
     }
 
     private void renderWeather(WeatherRequestRestModel model) {
-        if(WeatherTable.containsCity(database, currentCity)) {
-            Toast.makeText(getApplicationContext(), currentCity + " was update in the database", Toast.LENGTH_SHORT)
-                    .show();
-            WeatherTable.update(database, model.name, model.sys.country, model.weather[0].description,
-                    model.main.humidity, model.main.pressure, model.main.temp, model.dt, model.weather[0].id,
-                    model.sys.sunrise, model.sys.sunset);
-        } else {
-            Toast.makeText(getApplicationContext(), currentCity + " was add in the database", Toast.LENGTH_SHORT)
-                    .show();
-            WeatherTable.addRec(database, model.name.toUpperCase(), model.sys.country, model.weather[0].description,
-                    model.main.humidity, model.main.pressure, model.main.temp, model.dt, model.weather[0].id,
-                    model.sys.sunrise, model.sys.sunset);
-        }
-        fragmentMain.setPlaceName(model.name, model.sys.country);
-        fragmentMain.setDetails(model.weather[0].description, model.main.humidity, model.main.pressure);
-        fragmentMain.setCurrentTemp(model.main.temp);
-        fragmentMain.setUpdateText(model.dt);
-        fragmentMain.setWeatherIcon(model.weather[0].id, model.sys.sunrise * 1000,
-                model.sys.sunset * 1000);
+        weather.setCity(model.name);
+        weather.setCountry(model.sys.country);
+        weather.setDescription(model.weather[0].description);
+        weather.setHumidity(model.main.humidity);
+        weather.setPressure(model.main.pressure);
+        weather.setTemperature(model.main.temp);
+        weather.setUpdated(model.dt);
+        weather.setIcon(getWeatherIcon(model.weather[0].id, model.sys.sunrise, model.sys.sunset));
     }
 
-    private void renderWeather(HashMap<String, String> information) {
-        fragmentMain.setPlaceName(information.get("city"), information.get("country"));
-        fragmentMain.setDetails(information.get("description"), Float.parseFloat(information.get("humidity")), Float.parseFloat(information.get("pressure")));
-        fragmentMain.setCurrentTemp(Float.parseFloat(information.get("temperature")));
-        fragmentMain.setUpdateText(Long.parseLong(information.get("update")));
-        fragmentMain.setWeatherIcon(Integer.parseInt(information.get("icon")), Long.parseLong(information.get("sunrise")) * 1000,
-                Long.parseLong(information.get("sunset")) * 1000);
+    public String getWeatherIcon(int actualId, long sunrise, long sunset) {
+        int id = actualId / 100;
+        String icon = "";
+        if(actualId == 800) {
+            long currentTime = new Date().getTime();
+            if(currentTime >= sunrise && currentTime < sunset) {
+                icon = getString(R.string.weather_sunny);
+            } else {
+                icon = getString(R.string.weather_clear_night);
+            }
+        } else {
+            switch (id) {
+                case 2: {
+                    icon = getString(R.string.weather_thunder);
+                    break;
+                }
+                case 3: {
+                    icon = getString(R.string.weather_drizzle);
+                    break;
+                }
+                case 5: {
+                    icon = getString(R.string.weather_rainy);
+                    break;
+                }
+                case 6: {
+                    icon = getString(R.string.weather_snowy);
+                    break;
+                }
+                case 7: {
+                    icon = getString(R.string.weather_foggy);
+                    break;
+                }
+                case 8: {
+                    icon = getString(R.string.weather_cloudy);
+                    break;
+                }
+            }
+        }
+        return icon;
     }
 
     @Override
     public void citySelected(int cityID) {
         if(cityID == 1) showInputDialog();
-        else if (cityID > 1){
-            currentCity = WeatherTable.getCityById(database, cityID - 1);
-            updateWeatherData(currentCity);
-        }
     }
 
     @Override

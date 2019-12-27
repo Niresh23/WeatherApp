@@ -19,10 +19,14 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
+import com.google.android.gms.common.api.internal.LifecycleFragment;
 import com.nik.weather_app.R;
 import com.nik.weather_app.data.CitiesRepository;
+import com.nik.weather_app.repository.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 
 public class SettingFragment extends Fragment {
@@ -30,16 +34,14 @@ public class SettingFragment extends Fragment {
     private OnCitySelectedListener mOnCitySelectedListener;
     private List<String> cities;
     private Spinner spinner;
-    SettingViewModel viewModel;
-
-    public SettingFragment() {
-        // Required empty public constructor
-    }
+    private SettingViewModel viewModel;
+    private Repository repository;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        repository = new Repository(Objects.requireNonNull(getActivity()).getApplication());
         return inflater.inflate(R.layout.fragment_setting, container, false);
     }
 
@@ -47,14 +49,16 @@ public class SettingFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable final Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         Log.d("SettingFragment", "onViewCreated()");
-        viewModel = ViewModelProviders.of(this).get(SettingViewModel.class);
-        viewModel.getLiveData().observeForever(new Observer<SettingViewState>() {
-            @Override
-            public void onChanged(SettingViewState settingViewState) {
-                Log.d("onChanged()", "done");
-                cities = settingViewState.getCities();
-            }
-        });
+        repository.loadCities().observe(getViewLifecycleOwner(), strings -> cities = strings);
+//        viewModel = ViewModelProviders.of(this).get(SettingViewModel.class);
+//        viewModel.getLiveData().observeForever(settingViewState -> {
+//                Log.d("onChanged()", "done");
+//                cities = settingViewState.getCities();
+//        });
+        if(cities == null) {
+            cities = new ArrayList<>();
+            cities.add("null!!!");
+        }
         spinner = view.findViewById(R.id.spinner_cities);
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(),
                                         android.R.layout.simple_spinner_item, cities);
@@ -65,26 +69,22 @@ public class SettingFragment extends Fragment {
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 mOnCitySelectedListener.citySelected(i);
             }
-
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
 
             }
         });
     }
-    // TODO: Rename method, update argument and hook method into UI event
-
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         try{
             mOnCitySelectedListener = (OnCitySelectedListener) context;
         } catch(ClassCastException e) {
             throw new ClassCastException(context.toString() + "must implement" +
-                    "OnCitySelected interface");
+                                            "OnCitySelected interface");
         }
-
     }
 
     @Override
@@ -98,23 +98,7 @@ public class SettingFragment extends Fragment {
         super.onDetach();
         Log.d("SettingFragment", "onViewCreated()");
     }
-    //    public List<String> getCities(List<String> cities) {
-//        this.cities = cities;
-//        return cities;
-//    }
 
-
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
     public interface OnCitySelectedListener {
         void citySelected(int cityID);
     }

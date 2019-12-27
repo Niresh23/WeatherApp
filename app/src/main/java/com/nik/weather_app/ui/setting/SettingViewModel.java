@@ -9,12 +9,13 @@ import androidx.lifecycle.ViewModel;
 
 
 import com.nik.weather_app.data.CitiesRepository;
-
 import java.util.List;
 
+
 public class SettingViewModel extends ViewModel {
+
     private MutableLiveData<SettingViewState> viewStateLiveData = new MutableLiveData<>();
-    private LiveData<List<String>> repositoryLveData = CitiesRepository.getRepository().getLiveData();
+    private LiveData<List<String>> repositoryLiveData = CitiesRepository.getRepository().getLiveData();
     private final Observer<List<String>> observer = strings -> {
         Log.d("SettingViewModel","onChanged()");
         viewStateLiveData.setValue(new SettingViewState(strings));
@@ -22,7 +23,7 @@ public class SettingViewModel extends ViewModel {
 
     public SettingViewModel() {
         Log.d("SettingViewModel","Constructor()");
-        repositoryLveData.observeForever(observer);
+        repositoryLiveData.observeForever(observer);
 }
 
 
@@ -33,6 +34,6 @@ public class SettingViewModel extends ViewModel {
     @Override
     protected void onCleared() {
         super.onCleared();
-        repositoryLveData.removeObserver(observer);
+        repositoryLiveData.removeObserver(observer);
     }
 }

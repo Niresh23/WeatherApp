@@ -9,10 +9,13 @@ import androidx.room.RoomDatabase;
 @Database(entities = {City.class}, version = 1, exportSchema = false)
 public abstract class CityDB extends RoomDatabase {
     public abstract CityDao cityDao();
-
+    private static CityDB database;
     public static CityDB getInstance(Application application) {
         String DATABASE_NAME = "CityDatabase";
-        return Room.databaseBuilder(application, CityDB.class, DATABASE_NAME).build();
+        if(database == null) {
+            database = Room.databaseBuilder(application, CityDB.class, DATABASE_NAME).build();
+            return database;
+        } else return database;
     }
 
 }
