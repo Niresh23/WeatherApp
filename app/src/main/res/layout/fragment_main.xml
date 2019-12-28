@@ -68,7 +68,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
-                android:text="@{wather.temperature}"
+                android:text="@{weather.temperature}"
                 android:textSize="42sp" />
         </LinearLayout>
     </FrameLayout>

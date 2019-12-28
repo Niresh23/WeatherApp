@@ -41,7 +41,7 @@ public class SettingFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        repository = new Repository(Objects.requireNonNull(getActivity()).getApplication());
+        repository = Repository.getInstance(Objects.requireNonNull(getActivity()).getApplication());
         return inflater.inflate(R.layout.fragment_setting, container, false);
     }
 

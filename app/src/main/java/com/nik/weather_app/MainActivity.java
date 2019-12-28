@@ -32,6 +32,7 @@ import com.nik.weather_app.repository.Repository;
 import com.nik.weather_app.rest.OpenWeatherRepo;
 import com.nik.weather_app.rest.entities.WeatherRequestRestModel;
 import com.nik.weather_app.ui.main.FragmentMain;
+import com.nik.weather_app.ui.main.FragmentMainViewModel;
 import com.nik.weather_app.ui.setting.SettingFragment;
 
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -39,6 +40,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModelProviders;
 
 import android.view.Menu;
 import android.widget.EditText;
@@ -53,8 +56,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity
-        implements SettingFragment.OnCitySelectedListener,
-FragmentMain.GetDataListener{
+        implements SettingFragment.OnCitySelectedListener {
 
     //Переделать
     private String currentCity;
@@ -71,7 +73,8 @@ FragmentMain.GetDataListener{
 
     //База данных
     Repository repository;
-    Weather weather = new Weather();
+
+    MutableLiveData<Weather> weatherLiveData = new MutableLiveData<>();
     //
 
     //Геоданные
@@ -89,7 +92,6 @@ FragmentMain.GetDataListener{
         setSupportActionBar(toolbar);
         initFloatingAction();
         initDrawerLayout(toolbar);
-
         repository = new Repository(getApplication());
 
         if(!canAccessLocation()) {
@@ -106,7 +108,7 @@ FragmentMain.GetDataListener{
                 currentCity = getCityByLoc(loc);
                 Toast.makeText(getApplicationContext(), currentCity, Toast.LENGTH_SHORT)
                         .show();
-                updateWeatherData(currentCity);
+                repository.updateWeatherData(currentCity);
             }
         }
     }
@@ -244,7 +246,7 @@ FragmentMain.GetDataListener{
 
         switch (id) {
             case R.id.action_refresh: {
-                updateWeatherData(currentCity);
+                repository.updateWeatherData(currentCity);
                 break;
             }
 
@@ -282,42 +284,14 @@ FragmentMain.GetDataListener{
         builder.setView(input);
         builder.setPositiveButton("OK", (dialog, which) -> {
             currentCity = input.getText().toString().toUpperCase();
-            updateWeatherData(currentCity);
+            repository.updateWeatherData(currentCity);
             City city = new City();
             city.setCity(currentCity);
             });
         builder.show();
     }
 
-    private void updateWeatherData(final String city) {
-        OpenWeatherRepo.getSingletone().getAPI().loadWeather(city + ",ru",
-                "762ee61f52313fbd10a4eb54ae4d4de2", "metric")
-                .enqueue(new Callback<WeatherRequestRestModel>() {
-                    @Override
-                    public void onResponse(Call<WeatherRequestRestModel> call, Response<WeatherRequestRestModel> response) {
-                        if(response.body() != null && response.isSuccessful()) {
-                            renderWeather(response.body());
-                        }
-                    }
 
-                    @Override
-                    public void onFailure(Call<WeatherRequestRestModel> call, Throwable t) {
-                        Toast.makeText(getBaseContext(), getString(R.string.network_error),
-                                Toast.LENGTH_SHORT).show();
-                    }
-                });
-    }
-
-    private void renderWeather(WeatherRequestRestModel model) {
-        weather.setCity(model.name);
-        weather.setCountry(model.sys.country);
-        weather.setDescription(model.weather[0].description);
-        weather.setHumidity(model.main.humidity);
-        weather.setPressure(model.main.pressure);
-        weather.setTemperature(model.main.temp);
-        weather.setUpdated(model.dt);
-        weather.setIcon(getWeatherIcon(model.weather[0].id, model.sys.sunrise, model.sys.sunset));
-    }
 
     public String getWeatherIcon(int actualId, long sunrise, long sunset) {
         int id = actualId / 100;
@@ -365,10 +339,6 @@ FragmentMain.GetDataListener{
         if(cityID == 1) showInputDialog();
     }
 
-    @Override
-    public void getData() {
-        updateWeatherData(currentCity);
-    }
 
     private class LocListener implements LocationListener {
 
