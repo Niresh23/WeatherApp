@@ -21,6 +21,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.app.ActivityCompat;
 import androidx.core.view.GravityCompat;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 
@@ -114,9 +115,12 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-        if(mLocListener == null) mLocListener = new LocListener();
-        mLocManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-                3000L, 50000.0F, mLocListener);
+        if(LOCATION_PERMISSION_GRANTED) {
+            mLocListener = new LocListener();
+            mLocManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+                    3000L, 50000.0F, mLocListener);
+        }
+
     }
 
     @Override
@@ -180,12 +184,11 @@ public class MainActivity extends AppCompatActivity
         return city;
     }
 
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                                                @NonNull int[] grantResults) {
-        if(requestCode == 100) {
-            boolean permissionsGranted = (grantResults.length > 1 && grantResults[1] == PackageManager.PERMISSION_GRANTED)
-                    && (grantResults[0] == PackageManager.PERMISSION_GRANTED);
-            if(permissionsGranted) recreate();
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if(grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            LOCATION_PERMISSION_GRANTED = true;
         }
     }
 
