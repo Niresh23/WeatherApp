@@ -5,7 +5,7 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-/* (SQLiteDatabase database, String city, String country, String description, float humidity,
+/* (SQLiteDatabase database, String name, String country, String description, float humidity,
                               float pressure, float temperature, long update, long icon, long sunrise, long sunset)*/
 @Entity
 public class City {
@@ -16,7 +16,7 @@ public class City {
 
     @NonNull
     @ColumnInfo
-    public String city;
+    public String name;
 
     @ColumnInfo
     public String country;
@@ -25,8 +25,8 @@ public class City {
         this.id = id;
     }
 
-    public void setCity(@NonNull String city) {
-        this.city = city;
+    public void setName(@NonNull String name) {
+        this.name = name;
     }
 
     public void setCountry(String country) {
@@ -34,8 +34,8 @@ public class City {
     }
 
     @NonNull
-    public String getCity() {
-        return city;
+    public String getName() {
+        return name;
     }
 
     public String getCountry() {

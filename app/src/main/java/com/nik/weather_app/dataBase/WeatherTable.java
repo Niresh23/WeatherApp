@@ -73,7 +73,7 @@ public class WeatherTable {
                 COLUMN_CITY + " =?",
                 new String[]{city.toUpperCase()},null, null, null, null);
         if (cursor.moveToNext()){
-            information.put("city", city.toUpperCase());
+            information.put("name", city.toUpperCase());
             information.put("description",cursor.getString(cursor.getColumnIndex(COLUMN_DESCRIPTION)));
             information.put("country",cursor.getString(cursor.getColumnIndex(COLUMN_COUNTRY)));
             information.put("humidity",cursor.getString(cursor.getColumnIndex(COLUMN_HUMIDITY)));

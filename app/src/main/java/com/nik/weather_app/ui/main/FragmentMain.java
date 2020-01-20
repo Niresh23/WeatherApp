@@ -19,12 +19,15 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 
+import com.nik.weather_app.MainViewModel;
 import com.nik.weather_app.R;
 import com.nik.weather_app.databinding.FragmentMainBinding;
+import com.nik.weather_app.repository.Repository;
 
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Objects;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -32,7 +35,7 @@ import java.util.Locale;
 public class FragmentMain extends Fragment {
 
     private FragmentMainBinding binding;
-    private FragmentMainViewModel viewModel;
+    private MainViewModel viewModel;
     public FragmentMain() {
         // Required empty public constructor
     }
@@ -43,13 +46,12 @@ public class FragmentMain extends Fragment {
         Log.d("FragmentMain", "onCreateView()");
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_main,
                                                                 container,false);
-        viewModel = ViewModelProviders.of(this).get(FragmentMainViewModel.class);
-        viewModel.getLiveDataWeather().observeForever( weather -> {
+        viewModel = ViewModelProviders.of(Objects.requireNonNull(getActivity())).get(MainViewModel.class);
+        viewModel.getWeather().observeForever( weather -> {
             Log.d("FragmentMain","binding.setWeather()");
             binding.setWeather(weather);
-                }
+            }
         );
-
         return binding.getRoot();
     }
 

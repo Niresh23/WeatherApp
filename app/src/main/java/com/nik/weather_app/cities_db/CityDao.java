@@ -12,6 +12,8 @@ import java.util.List;
 import io.reactivex.Completable;
 import io.reactivex.Single;
 
+import static androidx.room.OnConflictStrategy.REPLACE;
+
 
 @Dao
 public interface CityDao {
@@ -22,16 +24,13 @@ public interface CityDao {
     @Query("SELECT * FROM  City WHERE id IN (:cityIds)")
     Single<List<City>> loadByIds(int[] cityIds);
 
-    @Query("SELECT * FROM City WHERE CITY LIKE :city LIMIT 1")
-    Single<City> loadByCity(String city);
-
-    @Query("SELECT city FROM City ORDER BY city")
+    @Query("SELECT name FROM City ORDER BY name")
     Single<List<String>> loadCities();
 
     @Delete
     Single<Integer> delete(City city);
 
-    @Insert
+    @Insert(onConflict = REPLACE)
     Completable add(City city);
 
     @Update

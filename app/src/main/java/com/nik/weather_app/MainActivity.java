@@ -72,15 +72,14 @@ public class MainActivity extends AppCompatActivity
     //
 
     //База данных
-    Repository repository;
-
-    MutableLiveData<Weather> weatherLiveData = new MutableLiveData<>();
+    MainViewModel viewModel;
     //
 
     //Геоданные
     private String TAG = "LOCATION";
     private LocationManager mLocManager = null;
     private LocListener mLocListener = null;
+    private boolean LOCATION_PERMISSION_GRANTED = false;
     //
 
     @SuppressLint("MissingPermission")
@@ -92,11 +91,9 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
         initFloatingAction();
         initDrawerLayout(toolbar);
-        repository = new Repository(getApplication());
-
-        if(!canAccessLocation()) {
-            requestPermissions(LOCATION_PERMISSION, INITIAL_REQUEST);
-        }
+        viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+        viewModel.connect(this);
+        requestPermissions(LOCATION_PERMISSION, INITIAL_REQUEST);
 
         openFragment(fragmentMain);
 
@@ -108,18 +105,9 @@ public class MainActivity extends AppCompatActivity
                 currentCity = getCityByLoc(loc);
                 Toast.makeText(getApplicationContext(), currentCity, Toast.LENGTH_SHORT)
                         .show();
-                repository.updateWeatherData(currentCity);
+                viewModel.updateWeather(currentCity);
             }
         }
-    }
-    private boolean canAccessLocation() {
-        return (PackageManager.PERMISSION_GRANTED == checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION));
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        fragmentManager.putFragment(outState, "fragmentMain", fragmentMain);
     }
 
     @SuppressLint("MissingPermission")
@@ -158,6 +146,11 @@ public class MainActivity extends AppCompatActivity
         }
         return bestLocation;
     }
+
+    private boolean canAccessLocation() {
+        return (PackageManager.PERMISSION_GRANTED == checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION));
+    }
+
     private String getCityByLoc(Location loc) {
 
         final Geocoder geo = new Geocoder(this);
@@ -246,7 +239,7 @@ public class MainActivity extends AppCompatActivity
 
         switch (id) {
             case R.id.action_refresh: {
-                repository.updateWeatherData(currentCity);
+                viewModel.updateWeather(currentCity);
                 break;
             }
 
@@ -284,9 +277,7 @@ public class MainActivity extends AppCompatActivity
         builder.setView(input);
         builder.setPositiveButton("OK", (dialog, which) -> {
             currentCity = input.getText().toString().toUpperCase();
-            repository.updateWeatherData(currentCity);
-            City city = new City();
-            city.setCity(currentCity);
+            viewModel.updateWeather(currentCity);
             });
         builder.show();
     }

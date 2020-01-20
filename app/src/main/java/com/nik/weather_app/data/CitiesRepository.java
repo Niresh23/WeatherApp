@@ -16,7 +16,7 @@ public class CitiesRepository {
 
     private CitiesRepository() {
         cities.add(0, "");
-        cities.add(1, "Another city...");
+        cities.add(1, "Another name...");
         cities.add("Moscow");
         cities.add("Novosibirsk");
         cities.add("Tomsk");
