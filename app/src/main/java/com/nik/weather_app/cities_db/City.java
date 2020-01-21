@@ -5,6 +5,8 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import java.util.UUID;
+
 /* (SQLiteDatabase database, String name, String country, String description, float humidity,
                               float pressure, float temperature, long update, long icon, long sunrise, long sunset)*/
 @Entity
@@ -12,36 +14,32 @@ public class City {
 
     @NonNull
     @PrimaryKey
-    public int id;
+    @ColumnInfo(name = "cityId")
+    private String mId;
 
     @NonNull
-    @ColumnInfo
-    public String name;
+    @ColumnInfo(name = "cityName")
+    private String mName;
 
-    @ColumnInfo
-    public String country;
+    @ColumnInfo(name = "countryName")
+    private String mCountry;
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public void setName(@NonNull String name) {
-        this.name = name;
-    }
-
-    public void setCountry(String country) {
-        this.country = country;
+    public City(@NonNull String cityName) {
+        mId = UUID.randomUUID().toString();
+        mName = cityName;
     }
 
     @NonNull
     public String getName() {
-        return name;
+        return mName;
     }
 
     public String getCountry() {
-        return country;
+        return mCountry;
     }
 
-    public int getId() {return id; }
+    public String getId() {
+        return mId;
+    }
 
 }

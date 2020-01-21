@@ -80,7 +80,7 @@ public class MainActivity extends AppCompatActivity
     private String TAG = "LOCATION";
     private LocationManager mLocManager = null;
     private LocListener mLocListener = null;
-    private boolean LOCATION_PERMISSION_GRANTED = false;
+    private boolean LOCATION_PERMISSION_GRANTED;
     //
 
     @SuppressLint("MissingPermission")
@@ -88,6 +88,7 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        LOCATION_PERMISSION_GRANTED = PackageManager.PERMISSION_GRANTED == checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         initFloatingAction();
@@ -95,20 +96,7 @@ public class MainActivity extends AppCompatActivity
         viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
         viewModel.connect(this);
         requestPermissions(LOCATION_PERMISSION, INITIAL_REQUEST);
-
         openFragment(fragmentMain);
-
-        //Работа с геоданными
-        if(canAccessLocation()) {
-            mLocManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-            Location loc = getLastKnownLocation();
-            if (loc != null) {
-                currentCity = getCityByLoc(loc);
-                Toast.makeText(getApplicationContext(), currentCity, Toast.LENGTH_SHORT)
-                        .show();
-                viewModel.updateWeather(currentCity);
-            }
-        }
     }
 
     @SuppressLint("MissingPermission")
@@ -116,6 +104,14 @@ public class MainActivity extends AppCompatActivity
     protected void onResume() {
         super.onResume();
         if(LOCATION_PERMISSION_GRANTED) {
+            mLocManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+            Location location = getLastKnownLocation();
+            if (location != null) {
+                currentCity = getCityByLoc(location);
+                Toast.makeText(getApplicationContext(), currentCity, Toast.LENGTH_SHORT)
+                        .show();
+                viewModel.updateWeather(currentCity);
+            }
             mLocListener = new LocListener();
             mLocManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
                     3000L, 50000.0F, mLocListener);
@@ -149,10 +145,6 @@ public class MainActivity extends AppCompatActivity
             }
         }
         return bestLocation;
-    }
-
-    private boolean canAccessLocation() {
-        return (PackageManager.PERMISSION_GRANTED == checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION));
     }
 
     private String getCityByLoc(Location loc) {

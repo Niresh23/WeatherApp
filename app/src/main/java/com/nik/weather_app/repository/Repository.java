@@ -8,7 +8,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.nik.weather_app.cities_db.City;
-import com.nik.weather_app.cities_db.CityDB;
+import com.nik.weather_app.cities_db.CityDatabase;
 import com.nik.weather_app.data.Weather;
 import com.nik.weather_app.rest.OpenWeatherRepo;
 import com.nik.weather_app.rest.entities.WeatherRequestRestModel;
@@ -33,7 +33,7 @@ public class Repository {
         return INSTANCE;
     }
 
-    private CityDB database;
+    private CityDatabase database;
     private Weather weather = new Weather();
     private MutableLiveData<Weather> liveData = new MutableLiveData<>();
     private Context context;
@@ -41,7 +41,7 @@ public class Repository {
 
     private Repository(Context context) {
         this.context = context;
-        database = CityDB.getInstance(context);
+        database = CityDatabase.getInstance(context);
         liveData.setValue(weather);
     }
 
