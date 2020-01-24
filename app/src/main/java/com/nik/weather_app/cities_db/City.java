@@ -27,6 +27,10 @@ public class City {
     public City(@NonNull String cityName) {
         mId = UUID.randomUUID().toString();
         mName = cityName;
+        mCountry = "RU";
+    }
+
+    public City() {
     }
 
     @NonNull
@@ -40,6 +44,18 @@ public class City {
 
     public String getId() {
         return mId;
+    }
+
+    public void setId(@NonNull String mId) {
+        this.mId = mId;
+    }
+
+    public void setName(@NonNull String mName) {
+        this.mName = mName;
+    }
+
+    public void setCountry(String mCountry) {
+        this.mCountry = mCountry;
     }
 
 }

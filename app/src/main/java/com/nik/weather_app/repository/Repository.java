@@ -52,8 +52,8 @@ public class Repository {
                 .subscribe(new DisposableSingleObserver<List<String>>() {
             @Override
             public void onSuccess(List<String> strings) {
-                Log.d("Repository", "loadCities().onSuccess()");
-                liveData.setValue(strings);
+                Log.d("Repository", "loadCities().onSuccess(), " + strings.get(0));
+                liveData.postValue(strings);
             }
 
             @Override

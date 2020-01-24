@@ -92,7 +92,6 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         initFloatingAction();
-        initDrawerLayout(toolbar);
         viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
         viewModel.connect(this);
         requestPermissions(LOCATION_PERMISSION, INITIAL_REQUEST);
@@ -186,18 +185,9 @@ public class MainActivity extends AppCompatActivity
 
     //Открытие фрагментов
     private void openFragment(Fragment fragment) {
-        fragmentManager.beginTransaction()
+        fragmentManager.beginTransaction().setCustomAnimations(R.anim.enter, R.anim.exit)
                 .replace(R.id.fragment_layout, fragment)
                 .addToBackStack(null).commit();
-    }
-
-    //Инициализация окружения
-    private void initDrawerLayout(Toolbar toolbar) {
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
     }
 
     private void initFloatingAction() {
@@ -255,8 +245,8 @@ public class MainActivity extends AppCompatActivity
                 break;
 
             default: {
-                Toast.makeText(getApplicationContext(), "Prekrasoe daleko", Toast.LENGTH_SHORT)
-                        .show();
+                openFragment(fragmentMain);
+                getSupportActionBar().setDisplayHomeAsUpEnabled(false);
             }
         }
         return super.onOptionsItemSelected(item);
@@ -273,6 +263,7 @@ public class MainActivity extends AppCompatActivity
         builder.setPositiveButton("OK", (dialog, which) -> {
             currentCity = input.getText().toString().toUpperCase();
             viewModel.updateWeather(currentCity);
+            viewModel.addCity(currentCity);
             });
         builder.show();
     }

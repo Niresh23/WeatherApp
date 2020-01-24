@@ -5,6 +5,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -37,6 +38,13 @@ public class SettingFragment extends Fragment {
     private Spinner spinner;
     private MainViewModel viewModel;
     private ArrayAdapter<String> adapter;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -49,8 +57,9 @@ public class SettingFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         Log.d("SettingFragment", "onViewCreated()");
         viewModel.getCities().observeForever(list -> {
-                Log.d("onChanged()", "done");
+
                 cities = list;
+            Log.d("SettingFragment", list.get(0));
                 adapter = new ArrayAdapter<>(getActivity(),
                     android.R.layout.simple_spinner_item, cities);
                 spinner.setAdapter(adapter);

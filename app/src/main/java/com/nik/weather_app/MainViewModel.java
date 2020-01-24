@@ -5,6 +5,8 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
+
+import com.nik.weather_app.cities_db.City;
 import com.nik.weather_app.data.Weather;
 import com.nik.weather_app.repository.Repository;
 
@@ -29,5 +31,7 @@ public class MainViewModel extends ViewModel {
     public LiveData<List<String>> getCities() {
         return repository.loadCities();
     }
+
+    public void addCity(String cityName) { repository.addCity(new City(cityName));}
 
 }
