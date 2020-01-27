@@ -42,14 +42,13 @@ import android.widget.Toast;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity
         implements SettingFragment.OnCitySelectedListener {
 
-    //Переделать
+
     private String currentCity;
-    private MenuListAdapter adapter = null;
-    private String MSG_NO_DATA = "Нет данных";
     private String[] LOCATION_PERMISSION = {Manifest.permission.ACCESS_FINE_LOCATION};
     private static final int INITIAL_REQUEST = 1337;
 
@@ -64,7 +63,6 @@ public class MainActivity extends AppCompatActivity
     //
 
     //Геоданные
-    private String TAG = "LOCATION";
     private LocationManager mLocManager = null;
     private LocListener mLocListener = null;
     private boolean LOCATION_PERMISSION_GRANTED;
@@ -114,20 +112,24 @@ public class MainActivity extends AppCompatActivity
     @RequiresApi(api = Build.VERSION_CODES.M)
     private Location getLastKnownLocation() {
         mLocManager = (LocationManager)getApplicationContext().getSystemService(LOCATION_SERVICE);
-        List<String> providers = mLocManager.getProviders(true);
+        List<String> providers;
         Location bestLocation = null;
-        for(String provider : providers) {
-            Location loc = null;
-            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                    checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (mLocManager != null) {
+            providers = mLocManager.getProviders(true);
+
+            for(String provider : providers) {
+                Location loc = null;
+                if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                        checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                     requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
-                            Manifest.permission.ACCESS_COARSE_LOCATION}, 100);
-            } else {
-                loc = mLocManager.getLastKnownLocation(provider);
-            }
-            if(loc == null) continue;
-            if(bestLocation == null || loc.getAccuracy() < bestLocation.getAccuracy()) {
-                bestLocation = loc;
+                            Manifest.permission.ACCESS_COARSE_LOCATION}, INITIAL_REQUEST);
+                } else {
+                    loc = mLocManager.getLastKnownLocation(provider);
+                }
+                if(loc == null) continue;
+                if(bestLocation == null || loc.getAccuracy() < bestLocation.getAccuracy()) {
+                    bestLocation = loc;
+                }
             }
         }
         return bestLocation;
@@ -147,6 +149,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         // If list is empty, return "No data" string
+        String MSG_NO_DATA = "Нет данных";
         if (list.isEmpty()) return MSG_NO_DATA;
 
         // Get first element from List
@@ -181,7 +184,7 @@ public class MainActivity extends AppCompatActivity
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(view -> {
             openFragment(settingFragment);
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         });
     }
 
@@ -220,7 +223,7 @@ public class MainActivity extends AppCompatActivity
 
             default: {
                 openFragment(fragmentMain);
-                getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+                Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(false);
             }
         }
         return super.onOptionsItemSelected(item);
