@@ -21,19 +21,11 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
-import androidx.core.app.ActivityCompat;
 import androidx.core.view.GravityCompat;
-import androidx.appcompat.app.ActionBarDrawerToggle;
 
 import android.view.MenuItem;
 
-import com.nik.weather_app.cities_db.City;
-import com.nik.weather_app.data.Weather;
-import com.nik.weather_app.repository.Repository;
-import com.nik.weather_app.rest.OpenWeatherRepo;
-import com.nik.weather_app.rest.entities.WeatherRequestRestModel;
 import com.nik.weather_app.ui.main.FragmentMain;
-import com.nik.weather_app.ui.main.FragmentMainViewModel;
 import com.nik.weather_app.ui.setting.SettingFragment;
 
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -41,7 +33,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProviders;
 
 import android.view.Menu;
@@ -51,10 +42,6 @@ import android.widget.Toast;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity
         implements SettingFragment.OnCitySelectedListener {
@@ -133,8 +120,8 @@ public class MainActivity extends AppCompatActivity
             Location loc = null;
             if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                     checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.ACCESS_COARSE_LOCATION}, 100);
+                    requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION}, 100);
             } else {
                 loc = mLocManager.getLastKnownLocation(provider);
             }
@@ -163,13 +150,13 @@ public class MainActivity extends AppCompatActivity
         if (list.isEmpty()) return MSG_NO_DATA;
 
         // Get first element from List
-        Address a = list.get(0);
+        Address address = list.get(0);
 
         // Get a Postal Code
-        final int index = a.getMaxAddressLineIndex();
+        final int index = address.getMaxAddressLineIndex();
         String city = null;
         if (index >= 0) {
-            city = a.getLocality();
+            city = address.getLocality();
         }
 
         return city;
@@ -192,10 +179,10 @@ public class MainActivity extends AppCompatActivity
 
     private void initFloatingAction() {
         FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(view ->
-                openFragment(settingFragment)
-
-        );
+        fab.setOnClickListener(view -> {
+            openFragment(settingFragment);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        });
     }
 
     @Override
@@ -228,19 +215,6 @@ public class MainActivity extends AppCompatActivity
                 break;
             }
 
-            case R.id.action_3_days: {
-                showInputDialog();
-                break;
-            }
-
-            case R.id.action_5_days: {
-                adapter.setFiveDays();
-                break;
-            }
-            case R.id.action_settings: {
-                openFragment(settingFragment);
-                break;
-            }
             case R.id.action_help:
                 break;
 
@@ -321,7 +295,7 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         public void onLocationChanged(Location location) {
-            Log.d(TAG, "onLocationChanged" + location.toString());
+            viewModel.updateWeather(getCityByLoc(location));
         }
 
         @Override
