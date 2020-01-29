@@ -18,6 +18,28 @@ public class Weather extends BaseObservable {
     private  String temperature = "1";
     private  String updated = "1";
     private  String icon = "1";
+    private long sunrise = 0;
+    private long sunset = 0;
+
+    @Bindable
+    public long getSunrise() {
+        return sunrise;
+    }
+
+    public void setSunrise(long sunrise) {
+        this.sunrise = sunrise;
+        notifyPropertyChanged(BR.sunrise);
+    }
+
+    @Bindable
+    public long getSunset() {
+        return sunset;
+    }
+
+    public void setSunset(long sunset) {
+        this.sunset = sunset;
+        notifyPropertyChanged(BR.sunset);
+    }
 
     @Bindable
     public String getCity() {

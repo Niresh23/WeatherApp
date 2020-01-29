@@ -250,46 +250,6 @@ public class MainActivity extends AppCompatActivity
 
 
 
-    public String getWeatherIcon(int actualId, long sunrise, long sunset) {
-        int id = actualId / 100;
-        String icon = "";
-        if(actualId == 800) {
-            long currentTime = new Date().getTime();
-            if(currentTime >= sunrise && currentTime < sunset) {
-                icon = getString(R.string.weather_sunny);
-            } else {
-                icon = getString(R.string.weather_clear_night);
-            }
-        } else {
-            switch (id) {
-                case 2: {
-                    icon = getString(R.string.weather_thunder);
-                    break;
-                }
-                case 3: {
-                    icon = getString(R.string.weather_drizzle);
-                    break;
-                }
-                case 5: {
-                    icon = getString(R.string.weather_rainy);
-                    break;
-                }
-                case 6: {
-                    icon = getString(R.string.weather_snowy);
-                    break;
-                }
-                case 7: {
-                    icon = getString(R.string.weather_foggy);
-                    break;
-                }
-                case 8: {
-                    icon = getString(R.string.weather_cloudy);
-                    break;
-                }
-            }
-        }
-        return icon;
-    }
 
     @Override
     public void citySelected(int cityID) {

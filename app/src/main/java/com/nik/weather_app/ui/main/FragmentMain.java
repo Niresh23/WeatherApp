@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 
@@ -46,8 +47,11 @@ public class FragmentMain extends Fragment {
         Log.d("FragmentMain", "onCreateView()");
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_main,
                                                                 container,false);
-        viewModel = ViewModelProviders.of(Objects.requireNonNull(getActivity())).get(MainViewModel.class);
-        viewModel.getWeather().observeForever( weather -> {
+        viewModel = ViewModelProviders
+                    .of(Objects.requireNonNull(getActivity())).get(MainViewModel.class);
+        Transformations.map(viewModel.getWeather(), weather ->
+                weather.setIcon(getWeatherIcon(Integer.parseInt(weather.getIcon()), weather.getSunrise(), weather.getSunset()));
+        viewModel.getWeather().observe(getActivity(), weather -> {
             Log.d("FragmentMain","binding.setWeather()");
             binding.setWeather(weather);
             }
@@ -59,5 +63,48 @@ public class FragmentMain extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
     }
+
+
+    private String getWeatherIcon(int actualId, long sunrise, long sunset) {
+        int id = actualId / 100;
+        String icon = "";
+        if(actualId == 800) {
+            long currentTime = new Date().getTime();
+            if(currentTime >= sunrise && currentTime < sunset) {
+                icon = getString(R.string.weather_sunny);
+            } else {
+                icon = getString(R.string.weather_clear_night);
+            }
+        } else {
+            switch (id) {
+                case 2: {
+                    icon = getString(R.string.weather_thunder);
+                    break;
+                }
+                case 3: {
+                    icon = getString(R.string.weather_drizzle);
+                    break;
+                }
+                case 5: {
+                    icon = getString(R.string.weather_rainy);
+                    break;
+                }
+                case 6: {
+                    icon = getString(R.string.weather_snowy);
+                    break;
+                }
+                case 7: {
+                    icon = getString(R.string.weather_foggy);
+                    break;
+                }
+                case 8: {
+                    icon = getString(R.string.weather_cloudy);
+                    break;
+                }
+            }
+        }
+        return icon;
+    }
+
 
 }
