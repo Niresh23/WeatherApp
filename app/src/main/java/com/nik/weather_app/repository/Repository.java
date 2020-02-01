@@ -129,7 +129,9 @@ public class Repository {
         weather.setPressure(model.main.pressure);
         weather.setTemperature(model.main.temp);
         weather.setUpdated(model.dt);
-        weather.setIcon("yasno");
+        weather.setIconId(model.weather[0].id);
+        weather.setSunrise(model.sys.sunrise);
+        weather.setSunset(model.sys.sunset);
         liveData.setValue(weather);
     }
 

@@ -101,7 +101,6 @@ public class MainActivity extends AppCompatActivity
             mLocManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
                     3000L, 50000.0F, mLocListener);
         }
-
     }
 
     @Override
@@ -109,7 +108,6 @@ public class MainActivity extends AppCompatActivity
         if(mLocListener != null) mLocManager.removeUpdates(mLocListener);
         super.onPause();
     }
-
 
     private Location getLastKnownLocation() {
         mLocManager = (LocationManager)getApplicationContext().getSystemService(LOCATION_SERVICE);

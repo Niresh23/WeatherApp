@@ -17,29 +17,15 @@ public class Weather extends BaseObservable {
     private  String pressure = "1";
     private  String temperature = "1";
     private  String updated = "1";
-    private  String icon = "1";
+    private  String icon = "yasno";
+
+
+
+    private int iconId = 0;
     private long sunrise = 0;
     private long sunset = 0;
 
-    @Bindable
-    public long getSunrise() {
-        return sunrise;
-    }
 
-    public void setSunrise(long sunrise) {
-        this.sunrise = sunrise;
-        notifyPropertyChanged(BR.sunrise);
-    }
-
-    @Bindable
-    public long getSunset() {
-        return sunset;
-    }
-
-    public void setSunset(long sunset) {
-        this.sunset = sunset;
-        notifyPropertyChanged(BR.sunset);
-    }
 
     @Bindable
     public String getCity() {
@@ -111,6 +97,10 @@ public class Weather extends BaseObservable {
         this.updated = String.valueOf(updated);
         notifyPropertyChanged(BR.updated);
     }
+    public void setUpdated(String updated) {
+        this.updated = updated;
+        notifyPropertyChanged(BR.updated);
+    }
 
     @Bindable
     public String getIcon() {
@@ -121,4 +111,30 @@ public class Weather extends BaseObservable {
         this.icon = icon;
         notifyPropertyChanged(BR.icon);
     }
+
+    public int getIconId() {
+        return iconId;
+    }
+
+    public void setIconId(int iconId) {
+        this.iconId = iconId;
+    }
+
+    public long getSunrise() {
+        return sunrise;
+    }
+
+    public void setSunrise(long sunrise) {
+        this.sunrise = sunrise * 1000;
+    }
+
+
+    public long getSunset() {
+        return sunset;
+    }
+
+    public void setSunset(long sunset) {
+        this.sunset = sunset * 1000;
+    }
+
 }

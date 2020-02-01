@@ -1,33 +1,27 @@
 package com.nik.weather_app.ui.main;
 
-
-import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Transformations;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
-
 
 import com.nik.weather_app.MainViewModel;
 import com.nik.weather_app.R;
+import com.nik.weather_app.data.Weather;
 import com.nik.weather_app.databinding.FragmentMainBinding;
-import com.nik.weather_app.repository.Repository;
 
 import java.text.DateFormat;
 import java.util.Date;
-import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -37,9 +31,7 @@ public class FragmentMain extends Fragment {
 
     private FragmentMainBinding binding;
     private MainViewModel viewModel;
-    public FragmentMain() {
-        // Required empty public constructor
-    }
+    public FragmentMain() {}
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -49,9 +41,8 @@ public class FragmentMain extends Fragment {
                                                                 container,false);
         viewModel = ViewModelProviders
                     .of(Objects.requireNonNull(getActivity())).get(MainViewModel.class);
-        Transformations.map(viewModel.getWeather(), weather ->
-                weather.setIcon(getWeatherIcon(Integer.parseInt(weather.getIcon()), weather.getSunrise(), weather.getSunset()));
-        viewModel.getWeather().observe(getActivity(), weather -> {
+        LiveData<Weather> ld = Transformations.map(viewModel.getWeather(), this::transformation);
+        ld.observe(getActivity(), weather -> {
             Log.d("FragmentMain","binding.setWeather()");
             binding.setWeather(weather);
             }
@@ -62,6 +53,20 @@ public class FragmentMain extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+    }
+
+
+    private Weather transformation(Weather weather) {
+        weather.setIcon(getWeatherIcon(weather.getIconId(), weather.getSunrise(), weather.getSunset()));
+        weather.setUpdated(renderDate(weather.getUpdated()));
+        return weather;
+    }
+
+    private String renderDate(String date) {
+        DateFormat dateFormat = DateFormat.getTimeInstance();
+        String updateOn = dateFormat.format(new Date(Long.parseLong(date) * 1000));
+        String updatedText = "Last update: " + updateOn;
+        return updatedText;
     }
 
 
@@ -105,6 +110,4 @@ public class FragmentMain extends Fragment {
         }
         return icon;
     }
-
-
 }
