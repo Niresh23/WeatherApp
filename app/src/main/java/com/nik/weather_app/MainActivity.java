@@ -240,8 +240,10 @@ public class MainActivity extends AppCompatActivity
         builder.setView(input);
         builder.setPositiveButton("OK", (dialog, which) -> {
             currentCity = input.getText().toString().toUpperCase();
-            viewModel.updateWeather(currentCity);
-            viewModel.addCity(currentCity);
+            if(currentCity.length() > 1) {
+                viewModel.updateWeather(currentCity);
+                viewModel.addCity(currentCity);
+            }
             });
         builder.show();
     }

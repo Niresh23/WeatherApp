@@ -10,6 +10,26 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_add_city"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/add_city" />
+
+            <Button
+                android:id="@+id/btn_clear_DB"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/clear_db" />
+        </LinearLayout>
+
         <TextView
             android:id="@+id/textView2"
             android:layout_width="match_parent"

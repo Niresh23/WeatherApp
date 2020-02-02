@@ -34,4 +34,8 @@ public class MainViewModel extends ViewModel {
 
     public void addCity(String cityName) { repository.addCity(new City(cityName));}
 
+    public void deleteAll() {
+        repository.deleteAll();
+    }
+
 }

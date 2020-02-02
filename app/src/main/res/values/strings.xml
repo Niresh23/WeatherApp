@@ -38,5 +38,7 @@
     <string name="weather_thunder">&#xf01e;</string>
     <string name="weather_drizzle">&#xf01c;</string>
     <string name="spinner_title">Выберите город</string>
+    <string name="add_city">Add city</string>
+    <string name="clear_db">Clear DB</string>
 
 </resources>

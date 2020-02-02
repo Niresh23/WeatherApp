@@ -95,6 +95,9 @@ public class Repository {
             }
         });
     }
+    public void deleteAll() {
+        database.cityDao().deleteAll();
+    }
 
     public void updateWeatherData(final String city) {
         City town = new City();

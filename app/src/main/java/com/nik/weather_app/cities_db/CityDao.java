@@ -31,6 +31,9 @@ public interface CityDao {
     @Delete
     Single<Integer> delete(City city);
 
+    @Query("DELETE FROM City")
+    void deleteAll();
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     Completable add(City city);
 
