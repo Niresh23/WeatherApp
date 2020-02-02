@@ -32,7 +32,7 @@ public interface CityDao {
     Single<Integer> delete(City city);
 
     @Query("DELETE FROM City")
-    void deleteAll();
+    Completable deleteAll();
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     Completable add(City city);

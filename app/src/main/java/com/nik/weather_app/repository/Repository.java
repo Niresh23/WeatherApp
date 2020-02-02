@@ -1,9 +1,11 @@
 package com.nik.weather_app.repository;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.Log;
 
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -26,6 +28,7 @@ import retrofit2.Response;
 
 public class Repository {
 
+    @SuppressLint("StaticFieldLeak")
     private static Repository INSTANCE = null;
     public static Repository getInstance(Context context) {
         if(INSTANCE == null)
@@ -36,11 +39,9 @@ public class Repository {
     private CityDatabase database;
     private Weather weather = new Weather();
     private MutableLiveData<Weather> liveData = new MutableLiveData<>();
-    private Context context;
 
 
     private Repository(Context context) {
-        this.context = context;
         database = CityDatabase.getInstance(context);
         liveData.setValue(weather);
     }
@@ -52,7 +53,7 @@ public class Repository {
                 .subscribe(new DisposableSingleObserver<List<String>>() {
             @Override
             public void onSuccess(List<String> strings) {
-                Log.d("Repository", "loadCities().onSuccess(), " + strings.get(0));
+                Log.d("Repository", "loadCities().onSuccess()");
                 liveData.postValue(strings);
             }
 
@@ -96,7 +97,25 @@ public class Repository {
         });
     }
     public void deleteAll() {
-        database.cityDao().deleteAll();
+        database.cityDao().deleteAll()
+                .subscribeOn(Schedulers.io())
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .subscribe(new CompletableObserver() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+                });
     }
 
     public void updateWeatherData(final String city) {
@@ -107,13 +126,15 @@ public class Repository {
                 "762ee61f52313fbd10a4eb54ae4d4de2", "metric")
                 .enqueue(new Callback<WeatherRequestRestModel>() {
                     @Override
-                    public void onResponse(Call<WeatherRequestRestModel> call, Response<WeatherRequestRestModel> response) {
+                    public void onResponse(@NonNull Call<WeatherRequestRestModel> call,
+                                           @NonNull Response<WeatherRequestRestModel> response) {
                         if(response.body() != null && response.isSuccessful()) {
                             renderWeather(response.body());
                         }
                     }
                     @Override
-                    public void onFailure(Call<WeatherRequestRestModel> call, Throwable t) {
+                    public void onFailure(@NonNull Call<WeatherRequestRestModel> call,
+                                          @NonNull Throwable t) {
 
                     }
                 });
@@ -124,7 +145,6 @@ public class Repository {
     }
 
     private void renderWeather(WeatherRequestRestModel model) {
-        Log.d("Repository", "renderWeather()");
         weather.setCity(model.name);
         weather.setCountry(model.sys.country);
         weather.setDescription(model.weather[0].description);

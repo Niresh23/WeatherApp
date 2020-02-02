@@ -3,52 +3,39 @@ package com.nik.weather_app;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
-
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.Build;
 import android.os.Bundle;
-
-
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
 import android.text.InputType;
-import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
-import androidx.core.view.GravityCompat;
-
-import android.view.MenuItem;
-
-import com.nik.weather_app.ui.main.FragmentMain;
-import com.nik.weather_app.ui.setting.SettingFragment;
-
-import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProviders;
 
-import android.view.Menu;
-import android.widget.EditText;
-import android.widget.Toast;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.nik.weather_app.ui.main.FragmentMain;
+import com.nik.weather_app.ui.setting.SettingFragment;
 
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
-public class MainActivity extends AppCompatActivity
-        implements SettingFragment.OnCitySelectedListener {
+public class MainActivity extends AppCompatActivity {
 
-    //Переделать
     private String currentCity;
-    private String MSG_NO_DATA = "Нет данных";
     private String[] LOCATION_PERMISSION = {Manifest.permission.ACCESS_FINE_LOCATION};
     private static final int INITIAL_REQUEST = 1337;
 
@@ -63,7 +50,6 @@ public class MainActivity extends AppCompatActivity
     //
 
     //Геоданные
-    private String TAG = "LOCATION";
     private LocationManager mLocManager = null;
     private LocListener mLocListener = null;
     private boolean LOCATION_PERMISSION_GRANTED;
@@ -74,7 +60,8 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        LOCATION_PERMISSION_GRANTED = PackageManager.PERMISSION_GRANTED == checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION);
+        LOCATION_PERMISSION_GRANTED = PackageManager.PERMISSION_GRANTED ==
+                checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         initFloatingAction();
@@ -111,6 +98,7 @@ public class MainActivity extends AppCompatActivity
 
     private Location getLastKnownLocation() {
         mLocManager = (LocationManager)getApplicationContext().getSystemService(LOCATION_SERVICE);
+        assert mLocManager != null;
         List<String> providers = mLocManager.getProviders(true);
         Location bestLocation = null;
         for(String provider : providers) {
@@ -144,6 +132,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         // If list is empty, return "No data" string
+        String MSG_NO_DATA = "Нет данных";
         if (list.isEmpty()) return MSG_NO_DATA;
 
         // Get first element from List
@@ -178,7 +167,7 @@ public class MainActivity extends AppCompatActivity
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(view -> {
             openFragment(settingFragment);
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         });
     }
 
@@ -223,7 +212,7 @@ public class MainActivity extends AppCompatActivity
 
             default: {
                 openFragment(fragmentMain);
-                getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+                Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(false);
             }
         }
 
@@ -247,15 +236,6 @@ public class MainActivity extends AppCompatActivity
             });
         builder.show();
     }
-
-
-
-
-    @Override
-    public void citySelected(int cityID) {
-        if(cityID == 1) showInputDialog();
-    }
-
 
     private class LocListener implements LocationListener {
 

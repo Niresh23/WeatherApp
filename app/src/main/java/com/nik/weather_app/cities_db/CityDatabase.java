@@ -12,7 +12,7 @@ public abstract class CityDatabase extends RoomDatabase {
     public abstract CityDao cityDao();
     private static CityDatabase INSTANCE;
     public static CityDatabase getInstance(Context context) {
-        String DATABASE_NAME = "CityDatabase";
+        String DATABASE_NAME = "City_DB";
         if(INSTANCE == null) {
             synchronized (CityDatabase.class) {
                 if(INSTANCE == null) {
