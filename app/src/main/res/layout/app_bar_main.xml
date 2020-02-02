@@ -15,7 +15,7 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/colorSurface"
+            android:background="#2196F3"
             app:popupTheme="@style/AppTheme.PopupOverlay" />
 
     </com.google.android.material.appbar.AppBarLayout>
@@ -28,8 +28,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
-        android:backgroundTint="@android:color/holo_green_light"
-        app:rippleColor="@color/cardview_light_background"
+        android:backgroundTint="@android:color/white"
+        app:rippleColor="@color/design_default_color_primary"
         app:srcCompat="@drawable/city_icon" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

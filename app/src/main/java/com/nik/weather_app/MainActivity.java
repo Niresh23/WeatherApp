@@ -234,7 +234,7 @@ public class MainActivity extends AppCompatActivity
     private void showInputDialog() {
         if(!fragmentMain.isVisible()) openFragment(fragmentMain);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.change_city);
+        builder.setTitle(R.string.action_change_city);
         final EditText input = new EditText(this);
         input.setInputType(InputType.TYPE_CLASS_TEXT);
         builder.setView(input);

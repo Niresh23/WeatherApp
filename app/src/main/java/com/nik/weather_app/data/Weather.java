@@ -26,6 +26,9 @@ public class Weather extends BaseObservable {
     private long sunset = 0;
 
 
+    private long date = 0;
+
+
 
     @Bindable
     public String getCity() {
@@ -135,6 +138,15 @@ public class Weather extends BaseObservable {
 
     public void setSunset(long sunset) {
         this.sunset = sunset * 1000;
+    }
+
+
+    public long getDate() {
+        return date;
+    }
+
+    public void setDate(long date) {
+        this.date = date;
     }
 
 }

@@ -128,7 +128,7 @@ public class Repository {
         weather.setHumidity(model.main.humidity);
         weather.setPressure(model.main.pressure);
         weather.setTemperature(model.main.temp);
-        weather.setUpdated(model.dt);
+        weather.setDate(model.dt);
         weather.setIconId(model.weather[0].id);
         weather.setSunrise(model.sys.sunrise);
         weather.setSunset(model.sys.sunset);

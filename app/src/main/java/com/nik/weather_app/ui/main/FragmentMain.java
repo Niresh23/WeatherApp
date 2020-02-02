@@ -58,15 +58,14 @@ public class FragmentMain extends Fragment {
 
     private Weather transformation(Weather weather) {
         weather.setIcon(getWeatherIcon(weather.getIconId(), weather.getSunrise(), weather.getSunset()));
-        weather.setUpdated(renderDate(weather.getUpdated()));
+        weather.setUpdated(renderDate(weather.getDate()));
         return weather;
     }
 
-    private String renderDate(String date) {
+    private String renderDate(long date) {
         DateFormat dateFormat = DateFormat.getTimeInstance();
-        String updateOn = dateFormat.format(new Date(Long.parseLong(date) * 1000));
-        String updatedText = "Last update: " + updateOn;
-        return updatedText;
+        String updateOn = dateFormat.format(new Date(date * 1000));
+        return "Last update: " + updateOn;
     }
 
 

@@ -5,13 +5,9 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 
-import android.transition.CircularPropagation;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,15 +16,10 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
-import com.google.android.gms.common.api.internal.LifecycleFragment;
 import com.nik.weather_app.MainViewModel;
 import com.nik.weather_app.R;
-import com.nik.weather_app.data.CitiesRepository;
-import com.nik.weather_app.repository.Repository;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 
 public class SettingFragment extends Fragment {
