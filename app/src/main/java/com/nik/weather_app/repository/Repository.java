@@ -72,9 +72,7 @@ public class Repository {
             @Override
             public void onSubscribe(Disposable d) { }
             @Override
-            public void onComplete() {
-                Log.d("Repository", "addCity().onComplete()");
-            }
+            public void onComplete() { }
             @Override
             public void onError(Throwable e) { e.printStackTrace(); }
         });
@@ -86,14 +84,10 @@ public class Repository {
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .subscribe(new DisposableSingleObserver<Integer>() {
             @Override
-            public void onSuccess(Integer integer) {
-
-            }
+            public void onSuccess(Integer integer) { }
 
             @Override
-            public void onError(Throwable e) {
-
-            }
+            public void onError(Throwable e) {  }
         });
     }
     public void deleteAll() {
@@ -102,19 +96,13 @@ public class Repository {
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .subscribe(new CompletableObserver() {
                     @Override
-                    public void onSubscribe(Disposable d) {
-
-                    }
+                    public void onSubscribe(Disposable d) { }
 
                     @Override
-                    public void onComplete() {
-
-                    }
+                    public void onComplete() { }
 
                     @Override
-                    public void onError(Throwable e) {
-
-                    }
+                    public void onError(Throwable e) {  }
                 });
     }
 
@@ -134,9 +122,7 @@ public class Repository {
                     }
                     @Override
                     public void onFailure(@NonNull Call<WeatherRequestRestModel> call,
-                                          @NonNull Throwable t) {
-
-                    }
+                                          @NonNull Throwable t) {  }
                 });
     }
 

@@ -39,5 +39,4 @@ public interface CityDao {
 
     @Update
     Completable updateCity(City city);
-
 }

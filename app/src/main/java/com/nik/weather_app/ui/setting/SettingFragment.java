@@ -1,6 +1,5 @@
 package com.nik.weather_app.ui.setting;
 
-import android.content.Context;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -10,7 +9,6 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 
 import android.text.InputType;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,35 +41,27 @@ public class SettingFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable final Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        Log.d("SettingFragment", "onViewCreated()");
         view.findViewById(R.id.btn_add_city).setOnClickListener(this);
         view.findViewById(R.id.btn_clear_DB).setOnClickListener(this);
         viewModel.getCities().observe(Objects.requireNonNull(getActivity()), list -> {
                 cities = list;
                 if(list.size() > 0) {
-                    Log.d("SettingFragment", list.get(0));
                     adapter = new ArrayAdapter<>(getActivity(),
-                                    android.R.layout.simple_spinner_item, cities);
+                                    R.layout.spinner_item, cities);
+                    adapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
                     spinner.setAdapter(adapter);
                 }
         });
         spinner = view.findViewById(R.id.spinner_cities);
-        spinner.setSelection(0);
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 viewModel.updateWeather((String)adapterView.getItemAtPosition(i));
+                spinner.setSelection(i);
             }
             @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
+            public void onNothingSelected(AdapterView<?> adapterView) {  }
         });
-    }
-
-    @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
     }
 
     @Override
