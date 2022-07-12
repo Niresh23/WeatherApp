@@ -43,25 +43,9 @@ public class SettingFragment extends Fragment implements View.OnClickListener {
         super.onViewCreated(view, savedInstanceState);
         view.findViewById(R.id.btn_add_city).setOnClickListener(this);
         view.findViewById(R.id.btn_clear_DB).setOnClickListener(this);
-        viewModel.getCities().observe(Objects.requireNonNull(getActivity()), list -> {
-                cities = list;
-                if(list.size() > 0) {
-                    adapter = new ArrayAdapter<>(getActivity(),
-                                    R.layout.spinner_item, cities);
-                    adapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
-                    spinner.setAdapter(adapter);
-                }
-        });
+
         spinner = view.findViewById(R.id.spinner_cities);
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                viewModel.updateWeather((String)adapterView.getItemAtPosition(i));
-                spinner.setSelection(i);
-            }
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {  }
-        });
+
     }
 
     @Override
@@ -71,7 +55,6 @@ public class SettingFragment extends Fragment implements View.OnClickListener {
                 showInputDialog();
                 break;
             case R.id.btn_clear_DB:
-                viewModel.deleteAll();
         }
     }
 
@@ -84,7 +67,6 @@ public class SettingFragment extends Fragment implements View.OnClickListener {
         builder.setPositiveButton("OK", (dialog, which) -> {
             String currentCity = input.getText().toString().toUpperCase();
             if(currentCity.length() > 1) {
-                viewModel.addCity(currentCity);
             }
         });
         builder.show();

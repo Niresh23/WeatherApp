@@ -1,8 +1,8 @@
-package com.nik.weather_app.rest.entities;
+package com.nik.weather_app.rest.model;
 
 import com.google.gson.annotations.SerializedName;
 
-public class WeatherRequestRestModel {
+public class WeatherResponseRestModel {
     @SerializedName("coord") public CoordRestModel coordinates;
     @SerializedName("weather") public WeatherRestModel[] weather;
     @SerializedName("base") public String base;
